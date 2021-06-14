@@ -133,6 +133,16 @@ namespace BeaterLibrary.Parsing
                         // Never seen this character in my life.
                         if (!char.IsWhiteSpace(Input.Current))
                             ThrowException($"Unrecognized character \"{Input.Current}\".");
+                        if (Input.Current == '\r')
+                            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                            {
+                                if (!Input.HasNext())
+                                    ThrowException($"Standalone carriage return character not supported.");
+                                Input.MoveNext();
+                                if (Input.Current != '\n')
+                                    ThrowException($"Standalone carriage return character not supported.");
+                                LineNumber++;
+                            }
                         break;
                 }
             }
