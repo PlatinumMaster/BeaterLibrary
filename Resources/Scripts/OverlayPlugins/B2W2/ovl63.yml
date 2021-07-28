@@ -1,0 +1,8 @@
+0x3E8:
+  Name: CMD_3E8
+  Parameters:
+    - ushort
+
+0x3E9:
+  Name: CMD_3E9
+

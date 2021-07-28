@@ -1,0 +1,89 @@
+0x3E8:
+  Name: CMD_3E8
+  Parameters:
+    - ushort
+
+0x3E9:
+  Name: CMD_3E9
+  Parameters:
+    - ushort
+
+0x3EA:
+  Name: CMD_3EA
+  Parameters:
+    - const ushort
+
+0x3EB:
+  Name: CMD_3EB
+  Parameters:
+    - const ushort
+
+0x3EC:
+  Name: CMD_3EC
+
+0x3ED:
+  Name: CMD_3ED
+  Parameters:
+    - const ushort
+
+0x3EE:
+  Name: CMD_3EE
+
+0x3EF:
+  Name: CMD_3EF
+
+0x3F0:
+  Name: CMD_3F0
+  Parameters:
+    - const ushort
+    - const ushort
+
+0x3F1:
+  Name: CMD_3F1
+
+0x3F2:
+  Name: CMD_3F2
+  Parameters:
+    - const ushort
+
+0x3F3:
+  Name: CMD_3F3
+  Parameters:
+    - const ushort
+
+0x3F4:
+  Name: CMD_3F4
+
+0x3F5:
+  Name: CMD_3F5
+
+0x3F6:
+  Name: CMD_3F6
+  Parameters:
+    - const ushort
+
+0x3F7:
+  Name: CMD_3F7
+
+0x3F8:
+  Name: CMD_3F8
+
+0x3F9:
+  Name: CMD_3F9
+
+0x3FA:
+  Name: CMD_3FA
+
+0x3FB:
+  Name: CMD_3FB
+  Parameters:
+    - const ushort
+
+0x3FC:
+  Name: CMD_3FC
+  Parameters:
+    - const ushort
+
+0x3FD:
+  Name: CMD_3FD
+

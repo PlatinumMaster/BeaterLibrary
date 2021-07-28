@@ -1,0 +1,150 @@
+0x3E8:
+  Name: CMD_3E8
+  Parameters:
+    - ushort
+    - ushort
+    - ref ushort
+
+0x3E9:
+  Name: CMD_3E9
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3EA:
+  Name: CMD_3EA
+  Parameters:
+    - ref ushort
+
+0x3EB:
+  Name: CMD_3EB
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3EC:
+  Name: CMD_3EC
+  Parameters:
+    - ushort
+
+0x3ED:
+  Name: CMD_3ED
+  Parameters:
+    - byte
+    - ushort
+
+0x3EE:
+  Name: CMD_3EE
+  Parameters:
+    - ushort
+    - ushort
+    - ref ushort
+
+0x3EF:
+  Name: CMD_3EF
+  Parameters:
+    - ushort
+    - ushort
+
+0x3F0:
+  Name: CMD_3F0
+  Parameters:
+    - ref ushort
+
+0x3F1:
+  Name: CMD_3F1
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3F2:
+  Name: CMD_3F2
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3F3:
+  Name: CMD_3F3
+
+0x3F4:
+  Name: CMD_3F4
+
+0x3F5:
+  Name: CMD_3F5
+  Parameters:
+    - ref ushort
+
+0x3F6:
+  Name: CMD_3F6
+  Parameters:
+    - ushort
+
+0x3F7:
+  Name: CMD_3F7
+  Parameters:
+    - ushort
+    - ref ushort
+    - ref ushort
+
+0x3F8:
+  Name: CMD_3F8
+  Parameters:
+    - ref ushort
+
+0x3F9:
+  Name: CMD_3F9
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3FA:
+  Name: CMD_3FA
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3FB:
+  Name: CMD_3FB
+  Parameters:
+    - ushort
+    - ref ushort
+    - ref ushort
+
+0x3FC:
+  Name: CMD_3FC
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x3FD:
+  Name: CMD_3FD
+  Parameters:
+    - ref ushort
+
+0x3FE:
+  Name: CMD_3FE
+  Parameters:
+    - ushort
+
+0x3FF:
+  Name: CMD_3FF
+  Parameters:
+    - ref ushort
+
+0x400:
+  Name: CMD_400
+  Parameters:
+    - ushort
+    - ushort
+    - ref ushort
+    - ref ushort
+
+0x401:
+  Name: CMD_401
+  Parameters:
+    - ushort
+    - ref ushort
+
+0x402:
+  Name: CMD_402
+

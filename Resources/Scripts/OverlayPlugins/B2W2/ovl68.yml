@@ -1,0 +1,32 @@
+0x3E8:
+  Name: CMD_3E8
+  Parameters:
+    - ushort
+
+0x3E9:
+  Name: CMD_3E9
+  Parameters:
+    - ushort
+
+0x3EA:
+  Name: CMD_3EA
+  Parameters:
+    - ushort
+
+0x3EB:
+  Name: CMD_3EB
+
+0x3EC:
+  Name: CMD_3EC
+
+0x3ED:
+  Name: CMD_3ED
+  Parameters:
+    - ushort
+
+0x3EE:
+  Name: CMD_3EE
+
+0x3EF:
+  Name: CMD_3EF
+

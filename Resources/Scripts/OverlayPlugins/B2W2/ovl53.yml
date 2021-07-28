@@ -1,0 +1,9 @@
+0x3E8:
+  Name: CMD_3E8
+
+0x3E9:
+  Name: CMD_3E9
+  Parameters:
+    - byte
+    - ref ushort
+
