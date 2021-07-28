@@ -13,12 +13,12 @@ namespace BeaterLibrary.Formats.Scripts
         private Dictionary<ushort, Command> Commands;
         private Dictionary<string, ushort> command_map;
 
-        public CommandsListHandler(string game)
+        public CommandsListHandler(string game, string ConfigurationPath)
         {
             Commands = new Dictionary<ushort, Command>();
             command_map = new Dictionary<string, ushort>();
             // Parse Commands from YAML, and store them.
-            using var s = File.OpenText($"{game}.yml");
+            using var s = File.OpenText(Path.Combine(ConfigurationPath, $"{game}.yml"));
             var deserializer = new Deserializer();
             var commands_yaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
 
@@ -30,13 +30,13 @@ namespace BeaterLibrary.Formats.Scripts
             }
         }
         
-        public CommandsListHandler(string game, params int[][] plugins) : this(game)
+        public CommandsListHandler(string game, string ConfigurationPath, params int[][] plugins) : this(game, ConfigurationPath)
         {
             if (plugins != null)
             {
                 foreach (int[] plugin_index in plugins)
                 {
-                    using var s = File.OpenText($"OverlayPlugins/{game}/{BuildOverlayPluginNames(plugin_index)}.yml");
+                    using var s = File.OpenText(Path.Combine(ConfigurationPath, "OverlayPlugins", game, $"{BuildOverlayPluginNames(plugin_index)}.yml"));
                     var deserializer = new Deserializer();
                     var commands_yaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
 

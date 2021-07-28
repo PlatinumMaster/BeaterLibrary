@@ -46,9 +46,9 @@ namespace BeaterLibrary
             S.Append('\n');
         }
 
-        public static void GenerateCommandASM(string game, int[][] ScriptPlugins)
+        public static void GenerateCommandASM(string game, string ConfigurationPath, int[][] ScriptPlugins)
         {
-            CommandsListHandler cmd = new CommandsListHandler(game, ScriptPlugins);
+            CommandsListHandler cmd = new CommandsListHandler(game, ConfigurationPath, ScriptPlugins);
             using StreamWriter o = new StreamWriter($"{game}.s");
             // Helper Macros
             o.WriteLine("@ Helper Macros");

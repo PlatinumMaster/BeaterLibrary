@@ -14,11 +14,11 @@ namespace BeaterLibrary.Formats.Scripts
         public List<Link<AnonymousScriptMethod>> Jumps { get; }
         public List<Link<Actions>> Actions { get; }
         
-        public ScriptContainer(string Path, string Game, int[][] Plugins)
+        public ScriptContainer(string Path, string ConfigurationPath, string Game, int[][] Plugins)
         {
             // Initialize the script we will read from.
             Binary = new BinaryReader(File.OpenRead(Path));
-            Handler = new CommandsListHandler(Game, Plugins);
+            Handler = new CommandsListHandler(Game, ConfigurationPath, Plugins);
             Scripts = new List<ScriptMethod>();
             Calls = new List<Link<AnonymousScriptMethod>>();
             Jumps = new List<Link<AnonymousScriptMethod>>();
@@ -56,10 +56,9 @@ namespace BeaterLibrary.Formats.Scripts
 
         public List<Command> ReadCommands(int Address)
         {
-            List<Command> Commands = new List<Command>();
-            List<Link<AnonymousScriptMethod>> LocalCalls = new List<Link<AnonymousScriptMethod>>();
-            List<Link<AnonymousScriptMethod>> LocalJumps = new List<Link<AnonymousScriptMethod>>();
-            List<Link<Actions>> LocalActions = new List<Link<Actions>>();
+            List<Command> Commands = new();
+            List<Link<AnonymousScriptMethod>> LocalCalls = new(), LocalJumps = new();
+            List<Link<Actions>> LocalActions = new();
             Binary.BaseStream.Position = Address;
             bool IsEnd = false;
             while (!IsEnd)
@@ -122,6 +121,7 @@ namespace BeaterLibrary.Formats.Scripts
                         throw new Exception($"Invalid type \"{T.Name}\".");
                 }
             }
+            System.Diagnostics.Debug.WriteLine(Cmd);
             return Cmd;
         }
         
@@ -142,10 +142,9 @@ namespace BeaterLibrary.Formats.Scripts
         private Command TryGetCommandTemplate(ushort ID)
         {
             if (!Handler.GetCommands().Contains(ID))
-                throw new Exception($"Unrecognized command ID: {ID} @ position {Binary.BaseStream.Position}");
+                throw new Exception($"Unrecognized command ID: {ID} @ position {Binary.BaseStream.Position - 0x2}.");
             Command def = Handler.GetCommand(ID);
             return new Command(def.Name, def.ID, def.Type, def.Types);
         }
-        
     }
 }
