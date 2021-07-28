@@ -5,22 +5,23 @@ using System.Text;
 
 namespace BeaterLibrary.Formats.Scripts
 {
-    public class LevelScriptDeclaration
+    public class InitializationScript
     {
         public ushort Unknown { get; set; }
         public ushort Unknown2 { get; set; }
         public ushort Unknown3 { get; set; }
-        public LevelScriptData Data { get; set; }
-        public static uint Size { get => 0x6; }
+        public InitializationScriptSecondaryData SecondaryData { get; set; }
 
-        public LevelScriptDeclaration()
+        public static uint Size => 0x6;
+
+        public InitializationScript()
         {
             Unknown = 0;
             Unknown2 = 0;
             Unknown3 = 0;
         }
 
-        public LevelScriptDeclaration(BinaryReader Binary)
+        public InitializationScript(BinaryReader Binary)
         {
             // Needs to be read from two sections.
             Unknown = Binary.ReadUInt16();
@@ -28,20 +29,21 @@ namespace BeaterLibrary.Formats.Scripts
             Unknown3 = Binary.ReadUInt16();
         }
     }
-    public class LevelScriptData
+
+    public class InitializationScriptSecondaryData
     {
         public ushort Unknown { get; set; }
         public ushort Unknown2 { get; set; }
         public ushort Unknown3 { get; set; }
 
-        public LevelScriptData()
+        public InitializationScriptSecondaryData()
         {
             Unknown = 0;
             Unknown2 = 0;
             Unknown3 = 0;
         }
 
-        public LevelScriptData(BinaryReader Binary)
+        public InitializationScriptSecondaryData(BinaryReader Binary)
         {
             // Needs to be read from two sections.
             Unknown = Binary.ReadUInt16();

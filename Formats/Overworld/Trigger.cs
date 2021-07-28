@@ -16,13 +16,18 @@ namespace BeaterLibrary.Formats.Furniture
         public ushort Unknown2 { get; set; }
         public ushort X { get; set; }
         public ushort Y { get; set; }
-        public ushort Z { get; set; }
+        public short Z { get; set; }
         public ushort W { get; set; }
         public ushort H { get; set; }
         public ushort Unknown3 { get; set; }
-        public static uint Size { get => 0x16; }
 
-        public Trigger() {
+        public static uint Size
+        {
+            get => 0x16;
+        }
+
+        public Trigger()
+        {
             Script = 0;
             ValueNeededForExecution = 0;
             Variable = 0;
@@ -47,7 +52,7 @@ namespace BeaterLibrary.Formats.Furniture
             Y = b.ReadUInt16();
             W = b.ReadUInt16();
             H = b.ReadUInt16();
-            Z = b.ReadUInt16();
+            Z = b.ReadInt16();
             Unknown3 = b.ReadUInt16();
         }
     }

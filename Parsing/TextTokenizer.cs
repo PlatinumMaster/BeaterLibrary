@@ -5,18 +5,20 @@ using System.Text.RegularExpressions;
 
 namespace BeaterLibrary.Parsing
 {
-    public class Tokenizer
+    public class TextTokenizer
     {
         int LineNumber { get; set; }
 
-        public Tokenizer()
+        public TextTokenizer()
         {
             LineNumber = 1;
         }
+
         private void ThrowException(string reason)
         {
             throw new Exception($"Error on Line {LineNumber}: {reason}");
         }
+
         public List<List<AbstractSyntaxNode>> Tokenize(string text)
         {
             List<List<AbstractSyntaxNode>> TextArrays = new List<List<AbstractSyntaxNode>>();
@@ -44,6 +46,7 @@ namespace BeaterLibrary.Parsing
                                 ThrowException($"Standalone carriage return character not supported.");
                             LineNumber++;
                         }
+
                         break;
                     case ' ':
                         break;
@@ -69,7 +72,7 @@ namespace BeaterLibrary.Parsing
             if (EndReached)
                 ThrowException("Unexpected end of array.");
 
-            IsCompressed = Input.Current.Equals('!');  // Check if compressed string.
+            IsCompressed = Input.Current.Equals('!'); // Check if compressed string.
 
             if (IsCompressed)
             {
@@ -95,19 +98,23 @@ namespace BeaterLibrary.Parsing
                         break;
                     case '"':
                         // Beginning of literal.
-                        List<AbstractSyntaxNode> QuotationMarkNodes = Nodes.FindAll(x => x.Type == TextTokens.QuotationMark);
+                        List<AbstractSyntaxNode> QuotationMarkNodes =
+                            Nodes.FindAll(x => x.Type == TextTokens.QuotationMark);
                         if (QuotationMarkNodes.Count > 0)
                         {
-                            List<AbstractSyntaxNode> OpenQuotationMarkNodes = QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Open")),
-                                CloseQuotationMarkNodes = QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Close"));
+                            List<AbstractSyntaxNode> OpenQuotationMarkNodes =
+                                    QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Open")),
+                                CloseQuotationMarkNodes =
+                                    QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Close"));
 
                             if (OpenQuotationMarkNodes.Count != CloseQuotationMarkNodes.Count)
-                                ThrowException("One or more strings in the array were not terminated correctly with a quotation mark.");
+                                ThrowException(
+                                    "One or more strings in the array were not terminated correctly with a quotation mark.");
                             else if (Nodes[Nodes.Count - 1].Type != TextTokens.Comma)
                                 ThrowException("Strings containing multiple lines must be separated by a comma.");
                         }
 
-                        Nodes.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') { Attribute = "Open" });
+                        Nodes.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {Attribute = "Open"});
                         foreach (AbstractSyntaxNode Node in ParseLiteral(Input))
                             Nodes.Add(Node);
                         break;
@@ -118,7 +125,8 @@ namespace BeaterLibrary.Parsing
 
                         AbstractSyntaxNode Last = Nodes.FindLast(x => x.Type == TextTokens.StringTerminator);
                         if (Last == null)
-                            ThrowException("You forgot to terminate the last string in the array with '$'. Please do so, or else your text will not save correctly.");
+                            ThrowException(
+                                "You forgot to terminate the last string in the array with '$'. Please do so, or else your text will not save correctly.");
 
                         Nodes.Add(new AbstractSyntaxNode(TextTokens.RightBracket, Input.Current));
                         EndReached = !EndReached;
@@ -143,6 +151,7 @@ namespace BeaterLibrary.Parsing
                                     ThrowException($"Standalone carriage return character not supported.");
                                 LineNumber++;
                             }
+
                         break;
                 }
             }
@@ -170,6 +179,7 @@ namespace BeaterLibrary.Parsing
                                 ThrowException("Unsupported: Carriage return character, but no newline character.");
                             LineNumber++;
                         }
+
                         EndReached = !EndReached;
                         break;
                     default:
@@ -184,7 +194,8 @@ namespace BeaterLibrary.Parsing
             int ByteSequenceParsed = 0;
 
             if (!Input.HasNext())
-                ThrowException("\"\\x\" is a reserved directive. It works fine without it being escaped. Remove the escape operator and try again.");
+                ThrowException(
+                    "\"\\x\" is a reserved directive. It works fine without it being escaped. Remove the escape operator and try again.");
 
             while (ByteSequenceParsed < 4 && Input.MoveNext())
             {
@@ -201,7 +212,8 @@ namespace BeaterLibrary.Parsing
             if (ByteSequenceParsed < 4)
                 ThrowException("Unexpected end of file.");
 
-            return new AbstractSyntaxNode(TextTokens.ByteSequence, ushort.Parse(ByteSequence.ToString(), System.Globalization.NumberStyles.HexNumber));
+            return new AbstractSyntaxNode(TextTokens.ByteSequence,
+                ushort.Parse(ByteSequence.ToString(), System.Globalization.NumberStyles.HexNumber));
         }
 
         private List<AbstractSyntaxNode> ParseLiteral(BidirectionalCharEnumerator Input)
@@ -227,7 +239,7 @@ namespace BeaterLibrary.Parsing
                                 // Macro for text clearing.
                                 TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xF000));
                                 TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xBE01));
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));       
+                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));
                                 break;
                             case 'n':
                                 // Macro for new line.
@@ -248,13 +260,15 @@ namespace BeaterLibrary.Parsing
                                 TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, Input.Current));
                                 break;
                         }
+
                         break;
                     case '{':
                         // String variable.
                         break;
                     case '"':
                         // Delimiter for literal.
-                        TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') { Attribute = "Close" });
+                        TokenizedLiteral.Add(
+                            new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {Attribute = "Close"});
                         EndReached = !EndReached;
                         break;
                     case '$':
@@ -265,6 +279,7 @@ namespace BeaterLibrary.Parsing
                         break;
                 }
             }
+
             if (!EndReached)
                 ThrowException("Missing string terminator.");
 

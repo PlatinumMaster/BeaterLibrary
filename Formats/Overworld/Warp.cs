@@ -15,11 +15,15 @@ namespace BeaterLibrary.Formats.Furniture
         public ushort CoordinateType { get; set; }
         public ushort X { get; set; }
         public ushort Y { get; set; }
-        public ushort Z { get; set; }
+        public short Z { get; set; }
         public ushort W { get; set; }
         public ushort H { get; set; }
         public ushort Rail { get; set; }
-        public static uint Size { get => 0x14; }
+
+        public static uint Size
+        {
+            get => 0x14;
+        }
 
         public Warp()
         {
@@ -44,7 +48,7 @@ namespace BeaterLibrary.Formats.Furniture
             TransitionType = b.ReadByte();
             CoordinateType = b.ReadUInt16();
             X = b.ReadUInt16();
-            Z = b.ReadUInt16();
+            Z = b.ReadInt16();
             Y = b.ReadUInt16();
             W = b.ReadUInt16();
             H = b.ReadUInt16();

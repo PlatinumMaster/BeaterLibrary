@@ -8,7 +8,12 @@ namespace BeaterLibrary.Parsing
     {
         private int Index = -1;
         private string Data;
-        public char Current { get => Index >= 0 && Index < Data.Length ? Data[Index] : (char)0; }
+
+        public char Current
+        {
+            get => Index >= 0 && Index < Data.Length ? Data[Index] : (char) 0;
+        }
+
         public BidirectionalCharEnumerator(string Data) => this.Data = Data;
         public bool MoveNext() => ++Index >= 0 && Index < Data.Length;
         public bool MoveBack() => --Index >= 0 && Index < Data.Length;

@@ -63,7 +63,7 @@ namespace BeaterLibrary.Formats.Text
 
                 for (int j = CharacterCounts[i] - 1; j >= 0; j--)
                 {
-                    TextCharacters[j] = (ushort)(TextCharacters[j] ^ Key);
+                    TextCharacters[j] = (ushort) (TextCharacters[j] ^ Key);
                     Key = (Key >> 0x3 | Key << 0xD) & 0xFFFF;
                 }
 
@@ -75,7 +75,7 @@ namespace BeaterLibrary.Formats.Text
                     bool Parsing = true;
                     int Container = 0, Bitshift = 0x0;
                     TextCharacters.RemoveAt(0); // Remove the compression flag "0xF100".                       
-                    while(TextCharacters.Count > 0)
+                    while (TextCharacters.Count > 0)
                     {
                         Container |= TextCharacters.First() << Bitshift;
                         TextCharacters.RemoveAt(0);
@@ -91,11 +91,12 @@ namespace BeaterLibrary.Formats.Text
                                 Parsing = !Parsing;
                                 break;
                             }
+
                             DecompressedCharacters.Add(c);
-                            
                             Container >>= 0x9;
                         }
                     }
+
                     TextCharacters = DecompressedCharacters;
                 }
 
@@ -152,6 +153,7 @@ namespace BeaterLibrary.Formats.Text
                                 break;
                         }
                     }
+
                     ParsedText.Append(Character);
 
                     if (Character.Equals("\\n"))
@@ -159,26 +161,31 @@ namespace BeaterLibrary.Formats.Text
                     else if (Character.Equals("\""))
                         ParsedText.Append("\\\"");
                 }
+
                 ParsedText.Append("\"]\n\n");
             }
+
             b.Close();
             return ParsedText.ToString();
         }
 
         public static void Serialize(string text, string output)
         {
-            List<List<AbstractSyntaxNode>> TokenizedStrings = new Tokenizer().Tokenize(text);
+            List<List<AbstractSyntaxNode>> TokenizedStrings = new TextTokenizer().Tokenize(text);
             BinaryWriter Binary = new BinaryWriter(File.Open(Path.GetFullPath(output), FileMode.OpenOrCreate));
             List<ushort> characterCounts = new List<ushort>();
             int mainKey = 0x7C89; // Encryption key.
-            uint sectionSize = Convert.ToUInt32(4 + (8 * TokenizedStrings.Count));          
+            uint sectionSize = Convert.ToUInt32(4 + (8 * TokenizedStrings.Count));
 
             // Prepare strings for export.
             for (int i = 0; i < TokenizedStrings.Count; i++)
             {
-                ushort characterCount = (ushort)TokenizedStrings[i].FindAll(x => x.Type == TextTokens.CompressionFlag || x.Type == TextTokens.TextCharacter || x.Type == TextTokens.StringTerminator || x.Type == TextTokens.ControlCharacter || x.Type == TextTokens.ByteSequence).Count;
+                ushort characterCount = (ushort) TokenizedStrings[i].FindAll(x =>
+                    x.Type == TextTokens.CompressionFlag || x.Type == TextTokens.TextCharacter ||
+                    x.Type == TextTokens.StringTerminator || x.Type == TextTokens.ControlCharacter ||
+                    x.Type == TextTokens.ByteSequence).Count;
                 characterCounts.Add(characterCount);
-                sectionSize += (uint)(0x2 * characterCount);
+                sectionSize += (uint) (0x2 * characterCount);
             }
 
             // Check if the string is compressed. If so, we need to do some work on the nodes.
@@ -186,14 +193,17 @@ namespace BeaterLibrary.Formats.Text
             {
                 if (TokenizedStrings[i].FindAll(x => x.Type == TextTokens.CompressionFlag).Count > 0)
                 {
-                    throw new Exception("Sorry, 9-bit strings cannot be encoded at this time. Remove the compression operator and try again.");
+                    throw new Exception(
+                        "Sorry, 9-bit strings cannot be encoded at this time. Remove the compression operator and try again.");
                     // Compressed string, decompress it.
-                    List<AbstractSyntaxNode> UncompressedNodes = TokenizedStrings[i].FindAll(x => x.Type == TextTokens.TextCharacter || x.Type == TextTokens.StringTerminator || x.Type == TextTokens.ControlCharacter || x.Type == TextTokens.ByteSequence);
+                    List<AbstractSyntaxNode> UncompressedNodes = TokenizedStrings[i].FindAll(x =>
+                        x.Type == TextTokens.TextCharacter || x.Type == TextTokens.StringTerminator ||
+                        x.Type == TextTokens.ControlCharacter || x.Type == TextTokens.ByteSequence);
                     List<AbstractSyntaxNode> CompressedNodes = new List<AbstractSyntaxNode>();
                     int container = 0, bit = 0;
                     for (int j = 0; j < UncompressedNodes.Count; ++j)
                     {
-                        container |= (ushort)UncompressedNodes[j].Value << bit;
+                        container |= (ushort) UncompressedNodes[j].Value << bit;
                         bit += 0x9;
                         while (bit >= 0x10)
                         {
@@ -202,15 +212,17 @@ namespace BeaterLibrary.Formats.Text
                             container >>= 0x10;
                         }
                     }
+
                     CompressedNodes.Insert(0, new AbstractSyntaxNode(TextTokens.CompressionFlag, 0xF100));
-                    CompressedNodes.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, (ushort)(container | 0xFFFF << bit)));
+                    CompressedNodes.Add(new AbstractSyntaxNode(TextTokens.ByteSequence,
+                        (ushort) (container | 0xFFFF << bit)));
                     TokenizedStrings[i] = CompressedNodes;
                 }
             }
-            
 
-            Binary.Write((ushort)0x1); // nSections. We only use 1. 
-            Binary.Write((ushort)TokenizedStrings.Count); // Number of entries.
+
+            Binary.Write((ushort) 0x1); // nSections. We only use 1. 
+            Binary.Write((ushort) TokenizedStrings.Count); // Number of entries.
             Binary.Write(sectionSize); // Section size.
             Binary.Write(0); // Unknown.
             Binary.Write(0x10); // Section offset.
@@ -218,15 +230,15 @@ namespace BeaterLibrary.Formats.Text
             // Begin writing the section.
             Binary.Write(sectionSize); // Section size.
 
-            uint offset = (uint)(4 + (8 * TokenizedStrings.Count));
+            uint offset = (uint) (4 + (8 * TokenizedStrings.Count));
             for (int i = 0; i < TokenizedStrings.Count; i++)
             {
                 Binary.Write(offset); // Offset.
                 Binary.Write(characterCounts[i]);
-                Binary.Write((ushort)0x0);
-                offset += (uint)(characterCounts[i] * 0x2);
+                Binary.Write((ushort) 0x0);
+                offset += (uint) (characterCounts[i] * 0x2);
             }
-            
+
             foreach (List<AbstractSyntaxNode> Nodes in TokenizedStrings)
             {
                 int key = mainKey;
@@ -243,6 +255,7 @@ namespace BeaterLibrary.Formats.Text
                             break;
                     }
                 }
+
                 mainKey += 0x2983;
                 mainKey = mainKey > 0xFFFF ? mainKey - 0x10000 : mainKey;
             }

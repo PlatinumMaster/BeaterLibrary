@@ -26,7 +26,7 @@ namespace BeaterLibrary.Formats.Furniture
         public ushort Y { get; set; }
         public ushort Unknown3 { get; set; }
         public short Z { get; set; }
-        public static uint Size { get => 0x24; }
+        public static uint Size => 0x24;
 
         public NPC()
         {

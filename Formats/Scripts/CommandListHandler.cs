@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Linq;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
 namespace BeaterLibrary.Formats.Scripts
 {
-    class FX32 {}
-    class FX16 {}
     public class CommandsListHandler
     {
-        private Dictionary<ushort, Command> commands;
+        private Dictionary<ushort, Command> Commands;
         private Dictionary<string, ushort> command_map;
 
         public CommandsListHandler(string game)
         {
-            commands = new Dictionary<ushort, Command>();
+            Commands = new Dictionary<ushort, Command>();
             command_map = new Dictionary<string, ushort>();
             // Parse Commands from YAML, and store them.
             using var s = File.OpenText($"{game}.yml");
@@ -25,40 +25,45 @@ namespace BeaterLibrary.Formats.Scripts
             foreach (var (key, node) in commands_yaml)
             {
                 var cmd = ReadCommandDetail(node, key);
-                commands.Add((ushort)key, cmd);
-                command_map.Add(cmd.Name, (ushort)key);
+                Commands.Add((ushort) key, cmd);
+                command_map.Add(cmd.Name, (ushort) key);
+            }
+        }
+        
+        public CommandsListHandler(string game, params int[][] plugins) : this(game)
+        {
+            if (plugins != null)
+            {
+                foreach (int[] plugin_index in plugins)
+                {
+                    using var s = File.OpenText($"OverlayPlugins/{game}/{BuildOverlayPluginNames(plugin_index)}.yml");
+                    var deserializer = new Deserializer();
+                    var commands_yaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
+
+                    foreach (var (key, node) in commands_yaml)
+                    {
+                        var cmd = ReadCommandDetail(node, key);
+                        Commands.Add((ushort) key, cmd);
+                        command_map.Add(cmd.Name, (ushort) key);
+                    }
+                }
             }
         }
 
-        private static Command ReadCommandDetail(YamlMappingNode node, int key)
-        {
-            var name = node["Name"].ToString();
-            var types = ReadCommandParameters(node);
+        private string BuildOverlayPluginNames(int[] plugin_indexes) => "ovl" + string.Join('_', plugin_indexes);
 
-            bool hasFunction = node.Children.ContainsKey("HasFunction") && node["HasFunction"].ToString() == "true",
-            hasMovement = node.Children.ContainsKey("HasMovement") && node["HasMovement"].ToString() == "true",
-            isEnd = node.Children.ContainsKey("IsEnd") && node["IsEnd"].ToString() == "true",
-            dynamicParams = node.Children.ContainsKey("DynamicParameters") && node["DynamicParameters"].ToString() == "true";
+        private static Command ReadCommandDetail(YamlMappingNode node, int key) => new Command(node["Name"].ToString(), (ushort) key, GetCommandType(node), ReadCommandParameters(node));
 
-            return new Command(name, (ushort)key, hasFunction, hasMovement, isEnd, dynamicParams, types);
-        }
+        public Command GetCommand(ushort id) => Commands[id];
 
-        public Command GetCommand(ushort id)
-        {
-            return commands[id];
-        }
+        public Dictionary<ushort, Command>.KeyCollection GetCommands() => Commands.Keys;
 
-        public Dictionary<ushort, Command>.KeyCollection GetCommands()
-        {
-            return commands.Keys;
-        }
-
-        private static List<Type> ReadCommandParameters(YamlMappingNode node)
+        private static List<Type> ReadCommandParameters(YamlMappingNode Node)
         {
             List<Type> types = new List<Type>();
-            if (node.Children.ContainsKey("Parameters"))
+            if (Node.Children.ContainsKey("Parameters"))
             {
-                YamlSequenceNode parameters = (YamlSequenceNode)node["Parameters"];
+                YamlSequenceNode parameters = (YamlSequenceNode) Node["Parameters"];
                 foreach (var p in parameters.Children)
                 {
                     switch (p.ToString())
@@ -83,9 +88,31 @@ namespace BeaterLibrary.Formats.Scripts
                     }
                 }
             }
-
-
             return types;
+        }
+
+        private static CommandTypes GetCommandType(YamlMappingNode Node)
+        {
+            if (!Node.Children.ContainsKey("CommandType"))
+                return CommandTypes.Default;
+
+            switch (Node["CommandType"].ToString())
+            {
+                case "Jump":
+                    return CommandTypes.Jump;
+                case "ConditionalJump":
+                    return CommandTypes.ConditionalJump;
+                case "Call":
+                    return CommandTypes.Call;
+                case "End":
+                    return CommandTypes.End;
+                case "Return":
+                    return CommandTypes.Return;
+                case "Movement":
+                    return CommandTypes.Actions;
+                default:
+                    return CommandTypes.Default;
+            }
         }
     }
 }

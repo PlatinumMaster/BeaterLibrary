@@ -1,49 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace BeaterLibrary.Formats.Scripts
 {
     public class Command
     {
+        public static List<CommandTypes> FunctionTypes = new List<CommandTypes>()
+            {CommandTypes.Call, CommandTypes.ConditionalJump, CommandTypes.Jump, CommandTypes.Actions};
         public string Name { get; }
         public IReadOnlyList<Type> Types { get; }
-        public bool HasFunction { get; }
-        public bool HasMovement { get; }
-        public bool IsEnd { get;  }
-        public bool dynamicParams { get; }
+        public CommandTypes Type { get; }
         public ushort ID { get; }
-        public List<object> Parameters { get; set; }
+        public List<object> Parameters { get; }
 
-        public Command(string name, ushort id, bool hasFunction, bool hasMovement, bool isEnd, bool dynamicParams, IReadOnlyList<Type> types)
+        public int Size()
         {
-            Name = name;
-            Types = types;
-            ID = id;
+            int Size = 0x2;
+            foreach (Type E in Types)
+                Size += Marshal.SizeOf(E);
+            return Size;
+        } 
+
+        public Command(string Name, ushort ID, CommandTypes type, IReadOnlyList<Type> Types)
+        {
+            this.Name = Name;
+            this.Types = Types;
+            this.ID = ID;
+            this.Type = type;
             Parameters = new List<object>();
-            HasFunction = hasFunction;
-            HasMovement = hasMovement;
-            IsEnd = isEnd;
         }
 
-        public Command(string name, ushort id, bool hasFunction, bool hasMovement, bool isEnd, bool dynamicParams)
-            : this(name, id, hasFunction, hasMovement, isEnd, dynamicParams, Array.Empty<Type>())
-        {
-        }
+        public Command(string Name, ushort ID, CommandTypes type) : this(Name, ID, type, Array.Empty<Type>()) { }
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
-            result.Append($"{Name} ");
-
-            for (int i = 0; i < Parameters.Count; i++)
-            {
-                result.Append(Parameters[i]);
-                if (i != Parameters.Count - 1)
-                    result.Append(", ");
-            }
-
-            return result.ToString();
+            string[] FormattedParams = new string[Parameters.Count];
+            for (int i = 0; i < Parameters.Count; ++i)
+                FormattedParams[i] = Util.IsNumericType(Parameters[i]) ? $"0x{Parameters[i]:X}" : Parameters[i].ToString();
+            return string.Join(' ', Name, string.Join(", ", FormattedParams)); 
         }
     }
 }

@@ -8,8 +8,4 @@
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Resources\Furniture\" />
-  </ItemGroup>
-
 </Project>

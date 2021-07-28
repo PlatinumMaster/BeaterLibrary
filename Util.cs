@@ -1,6 +1,7 @@
 ﻿using BeaterLibrary.Formats.Scripts;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -8,63 +9,91 @@ namespace BeaterLibrary
 {
     public static class Util
     {
-        public static string Flatten<T>(List<List<T>> l, string type, bool isScript)
+        public static bool IsNumericType(object Parameter)
         {
-            int counter = 0;
-            string output = "";
-            foreach (List<T> li in l)
-            {
-                StringBuilder st = new StringBuilder();
-                for (int i = 0; i < li.Count(); ++i)
-                    st.Append($"\t{li[i]}{Environment.NewLine}");
-
-                output = string.Join(Environment.NewLine, output, $"{type}{counter++}{(isScript ? ":" : "")}{Environment.NewLine}{st}{Environment.NewLine}");
-            }
-            return output;
+            return Parameter is sbyte || Parameter is byte
+                  || Parameter is short || Parameter is ushort
+                  || Parameter is int || Parameter is uint;
+        }
+        public static string UnpackScriptContainer(ScriptContainer SC)
+        {
+            StringBuilder S = new StringBuilder();
+            List<int> JumpOffsets = SC.Jumps.Select(x => x.StartAddress).ToList();
+            foreach (ScriptMethod Script in SC.Scripts)
+                UnpackMethod(Script, $"Script_{SC.Scripts.IndexOf(Script)}", S, JumpOffsets);
+            foreach (Link<AnonymousScriptMethod> Function in SC.Calls)
+                UnpackMethod(Function.Data, Function.ToString(), S, JumpOffsets);
+            foreach (Link<Actions> Actions in SC.Actions)
+                S.Append($"ActionSequence {Actions.GetDataToString()}\n");
+            return S.ToString();
         }
 
-        public static void GenerateCommandASM(string game)
+        private static void UnpackMethod(ScriptMethod Script, string ScriptName, StringBuilder S, List<int> JumpOffsets)
         {
-            CommandsListHandler cmd = new CommandsListHandler(game);
-            using System.IO.StreamWriter o = new System.IO.StreamWriter($"{game}.s");
+            int BaseAddress = Script.Address;
+            S.Append($"{ScriptName}:\n");
+            foreach (Command C in Script.Commands)
+            {
+                if (JumpOffsets.Contains(BaseAddress))
+                {
+                    S.Append($"AnonymousScriptMethod_{BaseAddress}:");
+                    S.AppendLine();
+                }
+                
+                S.Append($"\t{C}\n");
+                BaseAddress += C.Size();
+            }
+            S.Append('\n');
+        }
+
+        public static void GenerateCommandASM(string game, int[][] ScriptPlugins)
+        {
+            CommandsListHandler cmd = new CommandsListHandler(game, ScriptPlugins);
+            using StreamWriter o = new StreamWriter($"{game}.s");
             // Helper Macros
             o.WriteLine("@ Helper Macros");
 
             // Script: For the purpose of declaring each script in the header.
             o.WriteLine(
-            @".macro script, address
+                @".macro script, address
 .word  \address - . - 4
 .endm");
             o.WriteLine();
 
             // EndHeader: Declares the end of the header section.
             o.WriteLine(
-            @".macro EndHeader
+                @".macro EndHeader
 .hword 0xFD13
+.endm");
+            o.WriteLine();
+          
+            // Function: List of Actions.
+            o.WriteLine(
+                @".macro Function label
+.align 2
+\label:
+.endm");
+            // ActionSequence: List of Actions.
+            o.WriteLine(
+                @".macro ActionSequence label
+.align 2
+\label:
 .endm");
             o.WriteLine();
 
             // Movement: Declares a new movement instruction.
             o.WriteLine(
-            @".macro Movement x y
+                @".macro Action x y
 .hword \x
 .hword \y
 .endm");
             o.WriteLine();
 
-            // MovementLabel: Declares a a new movement label. Needed for padding.
+            // EndMovement: Declares the end of a movement.
             o.WriteLine(
-            @".macro MovementLabel label
-.align 4
-\label:
-.endm");
-            o.WriteLine();
-
-            // FunctionLabel: Declares a a new function label. Needed for padding.
-            o.WriteLine(
-            @".macro FunctionLabel label
-.align 4
-\label:
+                @".macro TerminateActionSequence
+.hword 0xFE
+.hword 0x00
 .endm");
             o.WriteLine();
 
@@ -86,12 +115,9 @@ namespace BeaterLibrary
                     switch (type.Name)
                     {
                         case "Int32":
-                            if (c.HasFunction || c.HasMovement)
-                            {
-                                o.WriteLine($".word (\\p{j++} - .) - 4");
-                                break;
-                            }
-                            o.WriteLine($".word \\p{j++}");
+                            bool IsBranch = c.Type is CommandTypes.Call || c.Type is CommandTypes.Actions ||
+                                            c.Type is CommandTypes.ConditionalJump || c.Type is CommandTypes.Jump;
+                            o.WriteLine(IsBranch ? $".word (\\p{j++} - .) - 4" : $".word \\p{j++}");
                             break;
                         case "UInt16":
                             o.WriteLine($".hword \\p{j++}");
