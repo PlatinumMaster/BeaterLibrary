@@ -22,7 +22,7 @@ namespace BeaterLibrary.Formats.Text
                 case 0xF000:
                     return "SPECIAL";
                 default:
-                    if (encrypted > 0x14 && encrypted < 0xD800)
+                    if (encrypted > 0x14 && encrypted < 0xBE00)
                         return Convert.ToChar(encrypted).ToString();
                     else
                         return $"\\x{encrypted:X4}";
@@ -110,43 +110,6 @@ namespace BeaterLibrary.Formats.Text
                     {
                         switch (DecryptCharacter(TextCharacters[++j]))
                         {
-                            /*
-                            case "븁":
-                                // Clear character.
-                                ++j;
-                                Character = "\\c";
-                                break;
-                            case "븀":
-                                // Scroll character.
-                                ++j;
-                                Character = "\\l";
-                                break;
-                            case "Ā":
-                                // Trainer variable.
-                                ++j;
-                                Character = $"{{TRAINER_VAR {TextCharacters[j++]}, {TextCharacters[j]}}}";
-                                break;
-                            case "봂":
-                                // Center directive.
-                                ++j;
-                                Character = "{CENTER}";
-                                break;
-                            case "븅":
-                                // Pause text reading.
-                                ++j;
-                                Character = $"{{PAUSE {TextCharacters[j]}}}";
-                                break;
-                            case "ā":
-                                // String buffer variable.
-                                ++j;
-                                Character = $"{{STRING_VAR {TextCharacters[j++]}, {TextCharacters[j]}}}";
-                                break;
-                            case "\\xFF00":
-                                // Color change.
-                                ++j;
-                                Character = $"{{COLOR {TextCharacters[++j]}}}";
-                                break;
-                            */
                             default:
                                 // I dunno.
                                 Character = $"\\xF000{DecryptCharacter(TextCharacters[j])}";
@@ -154,14 +117,13 @@ namespace BeaterLibrary.Formats.Text
                         }
                     }
 
-                    ParsedText.Append(Character);
-
                     if (Character.Equals("\\n"))
-                        ParsedText.Append("\",\n\"");
+                        ParsedText.Append("\\n\",\n\"");
                     else if (Character.Equals("\""))
                         ParsedText.Append("\\\"");
+                    else
+                        ParsedText.Append(Character);
                 }
-
                 ParsedText.Append("\"]\n\n");
             }
 
