@@ -1,31 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace BeaterLibrary.Formats.Furniture
+namespace BeaterLibrary.Formats.Overworld
 {
-    [Serializable()]
+    [Serializable]
     public class Trigger
     {
-        public ushort Script { get; set; }
-        public ushort ValueNeededForExecution { get; set; }
-        public ushort Variable { get; set; }
-
-        public ushort Unknown { get; set; }
-        public ushort Unknown2 { get; set; }
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
-        public short Z { get; set; }
-        public ushort W { get; set; }
-        public ushort H { get; set; }
-        public ushort Unknown3 { get; set; }
-
-        public static uint Size
-        {
-            get => 0x16;
-        }
-
         public Trigger()
         {
             Script = 0;
@@ -55,5 +35,20 @@ namespace BeaterLibrary.Formats.Furniture
             Z = b.ReadInt16();
             Unknown3 = b.ReadUInt16();
         }
+
+        public ushort Script { get; set; }
+        public ushort ValueNeededForExecution { get; set; }
+        public ushort Variable { get; set; }
+
+        public ushort Unknown { get; set; }
+        public ushort Unknown2 { get; set; }
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
+        public short Z { get; set; }
+        public ushort W { get; set; }
+        public ushort H { get; set; }
+        public ushort Unknown3 { get; set; }
+
+        public static uint Size => 0x16;
     }
 }

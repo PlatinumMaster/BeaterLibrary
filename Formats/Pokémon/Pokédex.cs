@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace BeaterLibrary.Formats.Pokémon
 {
-    class Pokédex
+    internal class Pokédex
     {
         public byte BaseHP { get; private set; }
         public byte BaseAttack { get; private set; }

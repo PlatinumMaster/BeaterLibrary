@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BeaterLibrary.Parsing
+﻿namespace BeaterLibrary.Parsing
 {
     public enum TextTokens
     {
@@ -18,6 +14,6 @@ namespace BeaterLibrary.Parsing
         TextCharacter,
         ControlCharacter,
         StringTerminator,
-        Comment,
+        Comment
     }
 }

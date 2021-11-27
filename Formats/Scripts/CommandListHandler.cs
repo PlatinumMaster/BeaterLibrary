@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
@@ -10,8 +8,8 @@ namespace BeaterLibrary.Formats.Scripts
 {
     public class CommandsListHandler
     {
-        private Dictionary<ushort, Command> Commands;
-        private Dictionary<string, ushort> command_map;
+        private readonly Dictionary<string, ushort> command_map;
+        private readonly Dictionary<ushort, Command> Commands;
 
         public CommandsListHandler(string game, string ConfigurationPath)
         {
@@ -29,43 +27,48 @@ namespace BeaterLibrary.Formats.Scripts
                 command_map.Add(cmd.Name, (ushort) key);
             }
         }
-        
-        public CommandsListHandler(string game, string ConfigurationPath, params int[][] plugins) : this(game, ConfigurationPath)
-        {
-            if (plugins != null)
-            {
-                foreach (int[] plugin_index in plugins)
-                {
-                    using var s = File.OpenText(Path.Combine(ConfigurationPath, "OverlayPlugins", game, $"{BuildOverlayPluginNames(plugin_index)}.yml"));
-                    var deserializer = new Deserializer();
-                    var commands_yaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
 
-                    foreach (var (key, node) in commands_yaml)
-                    {
-                        var cmd = ReadCommandDetail(node, key);
-                        Commands.Add((ushort) key, cmd);
-                        command_map.Add(cmd.Name, (ushort) key);
-                    }
+        public CommandsListHandler(string game, string ConfigurationPath, int[] plugins) : this(game,
+            ConfigurationPath)
+        {
+            if (plugins is {Length: > 0})
+            {
+                using var s = File.OpenText(Path.Combine(ConfigurationPath, "OverlayPlugins", game,
+                    $"ovl{string.Join("_", plugins)}.yml"));
+                var deserializer = new Deserializer();
+                var commands_yaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
+
+                foreach (var (key, node) in commands_yaml)
+                {
+                    var cmd = ReadCommandDetail(node, key);
+                    Commands.Add((ushort) key, cmd);
+                    command_map.Add(cmd.Name, (ushort) key);
                 }
             }
         }
 
-        private string BuildOverlayPluginNames(int[] plugin_indexes) => "ovl" + string.Join('_', plugin_indexes);
+        private static Command ReadCommandDetail(YamlMappingNode node, int key)
+        {
+            return new(node["Name"].ToString(), (ushort) key, GetCommandType(node), ReadCommandParameters(node));
+        }
 
-        private static Command ReadCommandDetail(YamlMappingNode node, int key) => new Command(node["Name"].ToString(), (ushort) key, GetCommandType(node), ReadCommandParameters(node));
+        public Command GetCommand(ushort id)
+        {
+            return Commands[id];
+        }
 
-        public Command GetCommand(ushort id) => Commands[id];
-
-        public Dictionary<ushort, Command>.KeyCollection GetCommands() => Commands.Keys;
+        public Dictionary<ushort, Command>.KeyCollection GetCommands()
+        {
+            return Commands.Keys;
+        }
 
         private static List<Type> ReadCommandParameters(YamlMappingNode Node)
         {
-            List<Type> types = new List<Type>();
+            var types = new List<Type>();
             if (Node.Children.ContainsKey("Parameters"))
             {
-                YamlSequenceNode parameters = (YamlSequenceNode) Node["Parameters"];
+                var parameters = (YamlSequenceNode) Node["Parameters"];
                 foreach (var p in parameters.Children)
-                {
                     switch (p.ToString())
                     {
                         case "int":
@@ -86,8 +89,8 @@ namespace BeaterLibrary.Formats.Scripts
                             types.Add(typeof(FX16));
                             break;
                     }
-                }
             }
+
             return types;
         }
 

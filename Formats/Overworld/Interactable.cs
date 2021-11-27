@@ -1,23 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
-namespace BeaterLibrary.Formats.Furniture
+namespace BeaterLibrary.Formats.Overworld
 {
-    [Serializable()]
+    [Serializable]
     public class Interactable
     {
-        public ushort Script { get; set; }
-        public ushort Condition { get; set; }
-        public ushort Interactibility { get; set; }
-        public ushort RailIndex { get; set; }
-        public uint X { get; set; }
-        public uint Y { get; set; }
-        public int Z { get; set; }
-        public static uint Size => 0x14;
-
         public Interactable()
         {
             Script = 0;
@@ -39,5 +27,14 @@ namespace BeaterLibrary.Formats.Furniture
             Y = b.ReadUInt32();
             Z = b.ReadInt32() / 0x10;
         }
+
+        public ushort Script { get; set; }
+        public ushort Condition { get; set; }
+        public ushort Interactibility { get; set; }
+        public ushort RailIndex { get; set; }
+        public uint X { get; set; }
+        public uint Y { get; set; }
+        public int Z { get; set; }
+        public static uint Size => 0x14;
     }
 }

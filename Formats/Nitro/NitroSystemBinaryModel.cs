@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -7,13 +6,9 @@ namespace BeaterLibrary.Formats.Nitro
 {
     public class NitroSystemBinaryModel
     {
-        private byte[] _data;
-
-        public byte[] Data => _data;
-
         public NitroSystemBinaryModel()
         {
-            _data = new byte[] { };
+            Data = new byte[] { };
         }
 
         public NitroSystemBinaryModel(byte[] Binary)
@@ -30,14 +25,14 @@ namespace BeaterLibrary.Formats.Nitro
             if (!Encoding.Default.GetString(Binary.Take(0x4).Select(x => x).ToArray()).Equals("BMD0"))
                 throw new Exception("Invalid model.");
 
-            _data = Binary;
+            Data = Binary;
         }
 
-        public string Name
-        {
-            get => _data.Length == 0
+        public byte[] Data { get; }
+
+        public string Name =>
+            Data.Length == 0
                 ? ""
-                : Encoding.Default.GetString(_data.Skip(0x34).Take(0x10).Select(x => x).Where(x => x != 0).ToArray());
-        }
+                : Encoding.Default.GetString(Data.Skip(0x34).Take(0x10).Select(x => x).Where(x => x != 0).ToArray());
     }
 }

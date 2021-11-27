@@ -1,0 +1,258 @@
+0x3E8:
+  Name: CMD_3E8
+
+0x3E9:
+  Name: CMD_3E9
+
+0x3EA:
+  Name: CMD_3EA
+  Parameters:
+    - ref ushort
+
+0x3EB:
+  Name: CMD_3EB
+  Parameters:
+    - ushort
+
+0x3EC:
+  Name: CMD_3EC
+  Parameters:
+    - ref ushort
+
+0x3ED:
+  Name: CMD_3ED
+
+0x3EE:
+  Name: CMD_3EE
+  OutsideOfOvl12: true
+
+0x3EF:
+  Name: CMD_3EF
+  OutsideOfOvl12: true
+
+0x3F0:
+  Name: CMD_3F0
+  OutsideOfOvl12: true
+
+0x3F1:
+  Name: CMD_3F1
+  Parameters:
+    - ushort
+
+0x3F2:
+  Name: CMD_3F2
+  Parameters:
+    - ref ushort
+
+0x3F3:
+  Name: CMD_3F3
+  Parameters:
+    - ushort
+
+0x3F4:
+  Name: CMD_3F4
+  Parameters:
+    - ref ushort
+
+0x3F5:
+  Name: CMD_3F5
+  Parameters:
+    - ushort
+
+0x3F6:
+  Name: CMD_3F6
+  Parameters:
+    - ref ushort
+
+0x3F7:
+  Name: CMD_3F7
+  Parameters:
+    - ushort
+
+0x3F8:
+  Name: CMD_3F8
+  Parameters:
+    - ref ushort
+
+0x3F9:
+  Name: CMD_3F9
+
+0x3FA:
+  Name: CMD_3FA
+  Parameters:
+    - ushort
+    - ushort
+    - ref ushort
+
+0x3FB:
+  Name: CMD_3FB
+  OutsideOfOvl12: true
+
+0x3FC:
+  Name: CMD_3FC
+  OutsideOfOvl12: true
+
+0x3FD:
+  Name: CMD_3FD
+  Exists: false
+
+0x3FE:
+  Name: CMD_3FE
+  OutsideOfOvl12: true
+
+0x3FF:
+  Name: CMD_3FF
+  OutsideOfOvl12: true
+
+0x400:
+  Name: CMD_400
+  Parameters:
+    - ref ushort
+
+0x401:
+  Name: CMD_401
+  OutsideOfOvl12: true
+
+0x402:
+  Name: CMD_402
+  OutsideOfOvl12: true
+
+0x403:
+  Name: CMD_403
+  OutsideOfOvl12: true
+
+0x404:
+  Name: CMD_404
+  OutsideOfOvl12: true
+
+0x405:
+  Name: CMD_405
+  OutsideOfOvl12: true
+
+0x406:
+  Name: CMD_406
+  OutsideOfOvl12: true
+
+0x407:
+  Name: CMD_407
+  OutsideOfOvl12: true
+
+0x408:
+  Name: CMD_408
+  OutsideOfOvl12: true
+
+0x409:
+  Name: CMD_409
+  OutsideOfOvl12: true
+
+0x40A:
+  Name: CMD_40A
+  OutsideOfOvl12: true
+
+0x40B:
+  Name: CMD_40B
+  OutsideOfOvl12: true
+
+0x40C:
+  Name: CMD_40C
+  OutsideOfOvl12: true
+
+0x40D:
+  Name: CMD_40D
+  OutsideOfOvl12: true
+
+0x40E:
+  Name: CMD_40E
+  OutsideOfOvl12: true
+
+0x40F:
+  Name: CMD_40F
+  OutsideOfOvl12: true
+
+0x410:
+  Name: CMD_410
+  OutsideOfOvl12: true
+
+0x411:
+  Name: CMD_411
+  OutsideOfOvl12: true
+
+0x412:
+  Name: CMD_412
+  OutsideOfOvl12: true
+
+0x413:
+  Name: CMD_413
+  OutsideOfOvl12: true
+
+0x414:
+  Name: CMD_414
+  Parameters:
+    - byte
+    - ushort
+
+0x415:
+  Name: CMD_415
+  OutsideOfOvl12: true
+
+0x416:
+  Name: CMD_416
+  OutsideOfOvl12: true
+
+0x417:
+  Name: CMD_417
+  Parameters:
+    - ushort
+
+0x418:
+  Name: CMD_418
+  OutsideOfOvl12: true
+
+0x419:
+  Name: CMD_419
+  OutsideOfOvl12: true
+
+0x41A:
+  Name: CMD_41A
+  OutsideOfOvl12: true
+
+0x41B:
+  Name: CMD_41B
+  OutsideOfOvl12: true
+
+0x41C:
+  Name: CMD_41C
+  OutsideOfOvl12: true
+
+0x41D:
+  Name: CMD_41D
+  OutsideOfOvl12: true
+
+0x41E:
+  Name: CMD_41E
+  OutsideOfOvl12: true
+
+0x41F:
+  Name: CMD_41F
+  OutsideOfOvl12: true
+
+0x420:
+  Name: CMD_420
+  OutsideOfOvl12: true
+
+0x421:
+  Name: CMD_421
+  OutsideOfOvl12: true
+
+0x422:
+  Name: CMD_422
+  OutsideOfOvl12: true
+
+0x423:
+  Name: CMD_423
+  OutsideOfOvl12: true
+
+0x424:
+  Name: CMD_424
+  OutsideOfOvl12: true
+

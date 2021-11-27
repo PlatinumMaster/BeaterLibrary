@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace BeaterLibrary.Formats.Pokémon
 {
-    class Move
+    internal class Move
     {
         public byte Type { get; private set; }
         public byte EffectCategory { get; private set; }

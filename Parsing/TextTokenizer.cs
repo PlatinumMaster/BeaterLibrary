@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace BeaterLibrary.Parsing
 {
     public class TextTokenizer
     {
-        int LineNumber { get; set; }
-
         public TextTokenizer()
         {
             LineNumber = 1;
         }
+
+        private int LineNumber { get; set; }
 
         private void ThrowException(string reason)
         {
@@ -21,8 +21,8 @@ namespace BeaterLibrary.Parsing
 
         public List<List<AbstractSyntaxNode>> Tokenize(string text)
         {
-            List<List<AbstractSyntaxNode>> TextArrays = new List<List<AbstractSyntaxNode>>();
-            BidirectionalCharEnumerator Input = new BidirectionalCharEnumerator(text);
+            var TextArrays = new List<List<AbstractSyntaxNode>>();
+            var Input = new BidirectionalCharEnumerator(text);
 
             if (!Input.HasNext())
                 ThrowException("You gotta write something, c'mon.");
@@ -36,17 +36,19 @@ namespace BeaterLibrary.Parsing
                         ParseComment(Input);
                         break;
                     case '\r':
-                    case '\n':
-                        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                        if (Environment.OSVersion.Platform != PlatformID.Unix)
                         {
                             if (!Input.HasNext())
-                                ThrowException($"Standalone carriage return character not supported.");
+                                ThrowException("Standalone carriage return character not supported.");
                             Input.MoveNext();
                             if (Input.Current != '\n')
-                                ThrowException($"Standalone carriage return character not supported.");
-                            LineNumber++;
+                                ThrowException("Standalone carriage return character not supported.");
                         }
 
+                        LineNumber++;
+                        break;
+                    case '\n':
+                        LineNumber++;
                         break;
                     case ' ':
                         break;
@@ -65,9 +67,9 @@ namespace BeaterLibrary.Parsing
 
         private List<AbstractSyntaxNode> TokenizeArray(BidirectionalCharEnumerator Input)
         {
-            List<AbstractSyntaxNode> Nodes = new List<AbstractSyntaxNode>();
+            var Nodes = new List<AbstractSyntaxNode>();
             bool IsCompressed;
-            bool EndReached = !Input.HasNext();
+            var EndReached = !Input.HasNext();
 
             if (EndReached)
                 ThrowException("Unexpected end of array.");
@@ -86,7 +88,6 @@ namespace BeaterLibrary.Parsing
             Nodes.Add(new AbstractSyntaxNode(TextTokens.LeftBracket, '['));
 
             while (!EndReached && Input.MoveNext())
-            {
                 switch (Input.Current)
                 {
                     case '!':
@@ -98,7 +99,7 @@ namespace BeaterLibrary.Parsing
                         break;
                     case '"':
                         // Beginning of literal.
-                        List<AbstractSyntaxNode> QuotationMarkNodes =
+                        var QuotationMarkNodes =
                             Nodes.FindAll(x => x.Type == TextTokens.QuotationMark);
                         if (QuotationMarkNodes.Count > 0)
                         {
@@ -115,7 +116,7 @@ namespace BeaterLibrary.Parsing
                         }
 
                         Nodes.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {Attribute = "Open"});
-                        foreach (AbstractSyntaxNode Node in ParseLiteral(Input))
+                        foreach (var Node in ParseLiteral(Input))
                             Nodes.Add(Node);
                         break;
                     case ']':
@@ -123,7 +124,7 @@ namespace BeaterLibrary.Parsing
                         if (Nodes[Nodes.Count - 1].Type != TextTokens.QuotationMark)
                             ThrowException("String was not terminated before using ']'.");
 
-                        AbstractSyntaxNode Last = Nodes.FindLast(x => x.Type == TextTokens.StringTerminator);
+                        var Last = Nodes.FindLast(x => x.Type == TextTokens.StringTerminator);
                         if (Last == null)
                             ThrowException(
                                 "You forgot to terminate the last string in the array with '$'. Please do so, or else your text will not save correctly.");
@@ -145,16 +146,15 @@ namespace BeaterLibrary.Parsing
                             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                             {
                                 if (!Input.HasNext())
-                                    ThrowException($"Standalone carriage return character not supported.");
+                                    ThrowException("Standalone carriage return character not supported.");
                                 Input.MoveNext();
                                 if (Input.Current != '\n')
-                                    ThrowException($"Standalone carriage return character not supported.");
+                                    ThrowException("Standalone carriage return character not supported.");
                                 LineNumber++;
                             }
 
                         break;
                 }
-            }
 
             if (!EndReached)
                 ThrowException("Missing string array terminator.");
@@ -163,9 +163,8 @@ namespace BeaterLibrary.Parsing
 
         private void ParseComment(BidirectionalCharEnumerator Input)
         {
-            bool EndReached = !Input.HasNext();
+            var EndReached = !Input.HasNext();
             while (!EndReached && Input.MoveNext())
-            {
                 switch (Input.Current)
                 {
                     case '\r':
@@ -182,16 +181,13 @@ namespace BeaterLibrary.Parsing
 
                         EndReached = !EndReached;
                         break;
-                    default:
-                        break;
                 }
-            }
         }
 
         private AbstractSyntaxNode ParseByteSequence(BidirectionalCharEnumerator Input)
         {
-            StringBuilder ByteSequence = new StringBuilder();
-            int ByteSequenceParsed = 0;
+            var ByteSequence = new StringBuilder();
+            var ByteSequenceParsed = 0;
 
             if (!Input.HasNext())
                 ThrowException(
@@ -213,19 +209,18 @@ namespace BeaterLibrary.Parsing
                 ThrowException("Unexpected end of file.");
 
             return new AbstractSyntaxNode(TextTokens.ByteSequence,
-                ushort.Parse(ByteSequence.ToString(), System.Globalization.NumberStyles.HexNumber));
+                ushort.Parse(ByteSequence.ToString(), NumberStyles.HexNumber));
         }
 
         private List<AbstractSyntaxNode> ParseLiteral(BidirectionalCharEnumerator Input)
         {
-            List<AbstractSyntaxNode> TokenizedLiteral = new List<AbstractSyntaxNode>();
-            bool EndReached = !Input.HasNext();
+            var TokenizedLiteral = new List<AbstractSyntaxNode>();
+            var EndReached = !Input.HasNext();
 
             if (EndReached)
                 ThrowException("Invalid literal.");
 
             while (!EndReached && Input.MoveNext())
-            {
                 switch (Input.Current)
                 {
                     case '\\':
@@ -278,7 +273,6 @@ namespace BeaterLibrary.Parsing
                         TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, Input.Current));
                         break;
                 }
-            }
 
             if (!EndReached)
                 ThrowException("Missing string terminator.");

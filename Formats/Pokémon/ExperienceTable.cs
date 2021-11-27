@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace BeaterLibrary.Formats.Pokémon
 {
-    class ExperienceTable
+    internal class ExperienceTable
     {
         public Dictionary<byte, uint> ExperienceTableMap;
     }

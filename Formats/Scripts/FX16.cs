@@ -1,6 +1,6 @@
 ﻿namespace BeaterLibrary.Formats.Scripts
 {
-    class FX16
+    internal class FX16
     {
     }
 }

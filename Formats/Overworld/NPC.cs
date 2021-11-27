@@ -1,33 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace BeaterLibrary.Formats.Furniture
+namespace BeaterLibrary.Formats.Overworld
 {
-    [Serializable()]
+    [Serializable]
     public class NPC
     {
-        public ushort ID { get; set; }
-        public ushort ModelID { get; set; }
-        public ushort MovementPermission { get; set; }
-        public ushort Type { get; set; }
-        public ushort SpawnFlag { get; set; }
-        public ushort ScriptID { get; set; }
-        public ushort FaceDirection { get; set; }
-        public ushort SightRange { get; set; }
-        public ushort Unknown { get; set; }
-        public ushort Unknown2 { get; set; }
-        public ushort TraversalWidth { get; set; }
-        public ushort TraversalHeight { get; set; }
-        public ushort StartingX { get; set; }
-        public ushort StartingY { get; set; }
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
-        public ushort Unknown3 { get; set; }
-        public short Z { get; set; }
-        public static uint Size => 0x24;
-
         public NPC()
         {
             ID = 0;
@@ -45,9 +23,9 @@ namespace BeaterLibrary.Formats.Furniture
             StartingX = 0;
             StartingY = 0;
             X = 0;
-            Y = 0;
-            Unknown3 = 0;
             Z = 0;
+            Unknown3 = 0;
+            Y = 0;
         }
 
         public NPC(BinaryReader b)
@@ -67,9 +45,29 @@ namespace BeaterLibrary.Formats.Furniture
             StartingX = b.ReadUInt16();
             StartingY = b.ReadUInt16();
             X = b.ReadUInt16();
-            Y = b.ReadUInt16();
+            Z = b.ReadUInt16();
             Unknown3 = b.ReadUInt16();
-            Z = b.ReadInt16();
+            Y = b.ReadInt16();
         }
+
+        public ushort ID { get; set; }
+        public ushort ModelID { get; set; }
+        public ushort MovementPermission { get; set; }
+        public ushort Type { get; set; }
+        public ushort SpawnFlag { get; set; }
+        public ushort ScriptID { get; set; }
+        public ushort FaceDirection { get; set; }
+        public ushort SightRange { get; set; }
+        public ushort Unknown { get; set; }
+        public ushort Unknown2 { get; set; }
+        public ushort TraversalWidth { get; set; }
+        public ushort TraversalHeight { get; set; }
+        public ushort StartingX { get; set; }
+        public ushort StartingY { get; set; }
+        public ushort X { get; set; }
+        public ushort Z { get; set; }
+        public ushort Unknown3 { get; set; }
+        public short Y { get; set; }
+        public static uint Size => 0x24;
     }
 }

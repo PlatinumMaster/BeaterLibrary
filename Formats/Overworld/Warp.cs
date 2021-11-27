@@ -1,30 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace BeaterLibrary.Formats.Furniture
+namespace BeaterLibrary.Formats.Overworld
 {
-    [Serializable()]
+    [Serializable]
     public class Warp
     {
-        public ushort TargetZone { get; set; }
-        public ushort TargetWarp { get; set; }
-        public byte ContactDirection { get; set; }
-        public byte TransitionType { get; set; }
-        public ushort CoordinateType { get; set; }
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
-        public short Z { get; set; }
-        public ushort W { get; set; }
-        public ushort H { get; set; }
-        public ushort Rail { get; set; }
-
-        public static uint Size
-        {
-            get => 0x14;
-        }
-
         public Warp()
         {
             TargetZone = 0;
@@ -54,5 +35,20 @@ namespace BeaterLibrary.Formats.Furniture
             H = b.ReadUInt16();
             Rail = b.ReadUInt16();
         }
+
+        public ushort TargetZone { get; set; }
+        public ushort TargetWarp { get; set; }
+        public byte ContactDirection { get; set; }
+        public byte TransitionType { get; set; }
+        public ushort CoordinateType { get; set; }
+        public ushort X { get; set; }
+        
+        public short Z { get; set; }
+        public ushort Y { get; set; }
+        public ushort W { get; set; }
+        public ushort H { get; set; }
+        public ushort Rail { get; set; }
+
+        public static uint Size => 0x14;
     }
 }

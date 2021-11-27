@@ -1,9 +1,8 @@
-﻿using BeaterLibrary.Formats.Scripts;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BeaterLibrary.Formats.Scripts;
 
 namespace BeaterLibrary
 {
@@ -12,44 +11,46 @@ namespace BeaterLibrary
         public static bool IsNumericType(object Parameter)
         {
             return Parameter is sbyte || Parameter is byte
-                  || Parameter is short || Parameter is ushort
-                  || Parameter is int || Parameter is uint;
+                                      || Parameter is short || Parameter is ushort
+                                      || Parameter is int || Parameter is uint;
         }
+
         public static string UnpackScriptContainer(ScriptContainer SC)
         {
-            StringBuilder S = new StringBuilder();
-            List<int> JumpOffsets = SC.Jumps.Select(x => x.StartAddress).ToList();
-            foreach (ScriptMethod Script in SC.Scripts)
-                UnpackMethod(Script, $"Script_{SC.Scripts.IndexOf(Script)}", S, JumpOffsets);
-            foreach (Link<AnonymousScriptMethod> Function in SC.Calls)
+            var S = new StringBuilder();
+            var JumpOffsets = SC.Jumps.Select(x => x.StartAddress).ToList();
+            foreach (var Script in SC.Scripts)
+                UnpackMethod(Script, $"Script_{SC.Scripts.IndexOf(Script) + 1}", S, JumpOffsets);
+            foreach (var Function in SC.Calls)
                 UnpackMethod(Function.Data, Function.ToString(), S, JumpOffsets);
-            foreach (Link<Actions> Actions in SC.Actions)
+            foreach (var Actions in SC.Actions)
                 S.Append($"ActionSequence {Actions.GetDataToString()}\n");
             return S.ToString();
         }
 
         private static void UnpackMethod(ScriptMethod Script, string ScriptName, StringBuilder S, List<int> JumpOffsets)
         {
-            int BaseAddress = Script.Address;
+            var BaseAddress = Script.Address;
             S.Append($"{ScriptName}:\n");
-            foreach (Command C in Script.Commands)
+            foreach (var C in Script.Commands)
             {
                 if (JumpOffsets.Contains(BaseAddress))
                 {
                     S.Append($"AnonymousScriptMethod_{BaseAddress}:");
                     S.AppendLine();
                 }
-                
+
                 S.Append($"\t{C}\n");
                 BaseAddress += C.Size();
             }
+
             S.Append('\n');
         }
 
-        public static void GenerateCommandASM(string game, string ConfigurationPath, int[][] ScriptPlugins)
+        public static void GenerateCommandASM(string game, string ConfigurationPath, int[] ScriptPlugins)
         {
-            CommandsListHandler cmd = new CommandsListHandler(game, ConfigurationPath, ScriptPlugins);
-            using StreamWriter o = new StreamWriter($"{game}.s");
+            var cmd = new CommandsListHandler(game, ConfigurationPath, ScriptPlugins);
+            using var o = new StreamWriter($"{game}.s");
             // Helper Macros
             o.WriteLine("@ Helper Macros");
 
@@ -66,7 +67,7 @@ namespace BeaterLibrary
 .hword 0xFD13
 .endm");
             o.WriteLine();
-          
+
             // Function: List of Actions.
             o.WriteLine(
                 @".macro Function label
@@ -100,23 +101,22 @@ namespace BeaterLibrary
             // Write all of the commands from the YAML.
             o.WriteLine("@ -----------------");
             o.WriteLine("@ Script Commands");
-            foreach (ushort key in cmd.GetCommands())
+            foreach (var key in cmd.GetCommands())
             {
-                Command c = cmd.GetCommand(key);
+                var c = cmd.GetCommand(key);
                 o.Write($".macro {c.Name} ");
-                for (int i = 0; i < c.Types.Count; i++)
+                for (var i = 0; i < c.Types.Count; i++)
                     o.Write($"p{i}{(i == c.Types.Count - 1 ? "" : ",")} ");
                 o.WriteLine();
                 o.WriteLine($".hword {c.ID}");
 
-                int j = 0;
+                var j = 0;
                 foreach (var type in c.Types)
-                {
                     switch (type.Name)
                     {
                         case "Int32":
-                            bool IsBranch = c.Type is CommandTypes.Call || c.Type is CommandTypes.Actions ||
-                                            c.Type is CommandTypes.ConditionalJump || c.Type is CommandTypes.Jump;
+                            var IsBranch = c.Type is CommandTypes.Call || c.Type is CommandTypes.Actions ||
+                                           c.Type is CommandTypes.ConditionalJump || c.Type is CommandTypes.Jump;
                             o.WriteLine(IsBranch ? $".word (\\p{j++} - .) - 4" : $".word \\p{j++}");
                             break;
                         case "UInt16":
@@ -132,7 +132,6 @@ namespace BeaterLibrary
                             o.WriteLine($".hword \\p{j++} * 4096");
                             break;
                     }
-                }
 
                 o.WriteLine(
                     @".endm

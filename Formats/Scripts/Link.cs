@@ -4,7 +4,15 @@
     {
         public int StartAddress { get; set; }
         public T Data { get; set; }
-        public override string ToString() => $"{typeof(T).Name}_{StartAddress}";
-        public string GetDataToString() => $"{typeof(T).Name}_{StartAddress}\n{Data}";
+
+        public override string ToString()
+        {
+            return $"{typeof(T).Name}_{StartAddress}";
+        }
+
+        public string GetDataToString()
+        {
+            return $"{typeof(T).Name}_{StartAddress}\n{Data}";
+        }
     }
 }

@@ -8,6 +8,6 @@
         Jump,
         Actions,
         Return,
-        End,
+        End
     }
 }

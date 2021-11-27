@@ -1,24 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BeaterLibrary.Parsing
+﻿namespace BeaterLibrary.Parsing
 {
     public class BidirectionalCharEnumerator
     {
+        private readonly string Data;
         private int Index = -1;
-        private string Data;
 
-        public char Current
+        public BidirectionalCharEnumerator(string Data)
         {
-            get => Index >= 0 && Index < Data.Length ? Data[Index] : (char) 0;
+            this.Data = Data;
         }
 
-        public BidirectionalCharEnumerator(string Data) => this.Data = Data;
-        public bool MoveNext() => ++Index >= 0 && Index < Data.Length;
-        public bool MoveBack() => --Index >= 0 && Index < Data.Length;
-        public bool HasNext() => Index + 1 >= 0 && Index + 1 < Data.Length;
-        public bool HasPrev() => Index - 1 >= 0 && Index - 1 < Data.Length;
-        public void Reset() => Index = -1;
+        public char Current => Index >= 0 && Index < Data.Length ? Data[Index] : (char) 0;
+
+        public bool MoveNext()
+        {
+            return ++Index >= 0 && Index < Data.Length;
+        }
+
+        public bool MoveBack()
+        {
+            return --Index >= 0 && Index < Data.Length;
+        }
+
+        public bool HasNext()
+        {
+            return Index + 1 >= 0 && Index + 1 < Data.Length;
+        }
+
+        public bool HasPrev()
+        {
+            return Index - 1 >= 0 && Index - 1 < Data.Length;
+        }
+
+        public void Reset()
+        {
+            Index = -1;
+        }
+
+        public char PeekNext()
+        {
+            if (HasNext())
+            {
+                char Data;
+                MoveNext();
+                Data = Current;
+                MoveBack();
+                return Data;
+            }
+
+            return (char) 9999;
+        }
     }
 }
