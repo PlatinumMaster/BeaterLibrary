@@ -2,37 +2,33 @@
 using System.Linq;
 using System.Text;
 
-namespace BeaterLibrary.Formats.Nitro
-{
-    public class NitroSystemBinaryModel
-    {
-        public NitroSystemBinaryModel()
-        {
-            Data = new byte[] { };
+namespace BeaterLibrary.Formats.Nitro {
+    public class NitroSystemBinaryModel {
+        public NitroSystemBinaryModel() {
+            data = new byte[] { };
         }
 
-        public NitroSystemBinaryModel(byte[] Binary)
-        {
-            if (Binary.Length < 0x10)
+        public NitroSystemBinaryModel(byte[] binary) {
+            if (binary.Length < 0x10)
                 throw new Exception("Invalid model.");
 
-            if (Binary.Length != BitConverter.ToInt32(Binary.Skip(0x8).Take(0x4).ToArray(), 0))
+            if (binary.Length != BitConverter.ToInt32(binary.Skip(0x8).Take(0x4).ToArray(), 0))
                 throw new Exception("Invalid model.");
 
-            if (BitConverter.ToUInt16(Binary.Skip(0xE).Take(0x2).ToArray(), 0) != 1)
+            if (BitConverter.ToUInt16(binary.Skip(0xE).Take(0x2).ToArray(), 0) != 1)
                 throw new Exception("Sorry, but you must import a model that has only model data.");
 
-            if (!Encoding.Default.GetString(Binary.Take(0x4).Select(x => x).ToArray()).Equals("BMD0"))
+            if (!Encoding.Default.GetString(binary.Take(0x4).Select(x => x).ToArray()).Equals("BMD0"))
                 throw new Exception("Invalid model.");
 
-            Data = Binary;
+            data = binary;
         }
 
-        public byte[] Data { get; }
+        public byte[] data { get; }
 
-        public string Name =>
-            Data.Length == 0
+        public string name =>
+            data.Length == 0
                 ? ""
-                : Encoding.Default.GetString(Data.Skip(0x34).Take(0x10).Select(x => x).Where(x => x != 0).ToArray());
+                : Encoding.Default.GetString(data.Skip(0x34).Take(0x10).Select(x => x).Where(x => x != 0).ToArray());
     }
 }

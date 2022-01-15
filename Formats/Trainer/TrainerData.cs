@@ -1,76 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using BeaterLibrary.Parsing;
 
-namespace BeaterLibrary.Formats.Trainer
-{
-    public class TrainerData
-    {
-        public TrainerData()
-        {
-            HasItems = false;
-            OverrideMoves = false;
-            BattleType = 0;
-            NumberOfPokemon = 0;
-            Items = new List<ushort>();
-            AI = 0;
-            IsHealer = false;
-            Money = 0;
-            Prize = 0;
+namespace BeaterLibrary.Formats.Trainer {
+    public class TrainerData {
+        public TrainerData() {
+            setPkmnHeldItem = false;
+            setPkmnMoves = false;
+            battleType = 0;
+            numberOfPokemon = 0;
+            items = new List<ushort>();
+            ai = 0;
+            isHealer = false;
+            money = 0;
+            prize = 0;
         }
 
-        public TrainerData(BinaryReader Binary) : this()
-        {
-            var Format = Binary.ReadByte();
-            HasItems = ((Format >> 0x1) & 0x1) == 1;
-            OverrideMoves = (Format & 0x1) == 1;
+        public TrainerData(byte[] data) : this() {
+            var binary = new BinaryReaderEx(data);
+            var format = binary.ReadByte();
+            setPkmnHeldItem = ((format >> 0x1) & 0x1) == 1;
+            setPkmnMoves = (format & 0x1) == 1;
 
-            Class = Binary.ReadByte();
-            BattleType = Binary.ReadByte();
-            NumberOfPokemon = Binary.ReadByte();
+            trainerClass = binary.ReadByte();
+            battleType = binary.ReadByte();
+            numberOfPokemon = binary.ReadByte();
 
-            for (var i = 0; i < 4; ++i)
-                Items.Add(Binary.ReadUInt16());
+            for (var i = 0; i < 4; ++i) items.Add(binary.ReadUInt16());
 
-            AI = Binary.ReadUInt32();
+            ai = binary.ReadUInt32();
 
-            if (NumberOfPokemon > 0)
-            {
-                IsHealer = Binary.ReadByte() != 0x0;
-                Money = Binary.ReadByte();
-                Prize = Binary.ReadUInt16();
+            if (numberOfPokemon > 0) {
+                isHealer = binary.ReadByte() != 0x0;
+                money = binary.ReadByte();
+                prize = binary.ReadUInt16();
             }
         }
 
-        public bool HasItems { get; set; }
-        public bool OverrideMoves { get; set; }
-        public byte Class { get; set; }
-        public byte BattleType { get; set; }
-        public byte NumberOfPokemon { get; set; }
-        public List<ushort> Items { get; set; }
-        public uint AI { get; set; }
-        public bool IsHealer { get; set; }
-        public byte Money { get; set; }
-        public ushort Prize { get; set; }
+        public bool setPkmnHeldItem { get; set; }
+        public bool setPkmnMoves { get; set; }
+        public byte trainerClass { get; set; }
+        public byte battleType { get; set; }
+        public byte numberOfPokemon { get; set; }
+        public List<ushort> items { get; set; }
+        public uint ai { get; set; }
+        public bool isHealer { get; set; }
+        public byte money { get; set; }
+        public ushort prize { get; set; }
 
-        public void Serialize(List<TrainerPokémonEntry> Pkmn, string Output)
-        {
-            var Binary = new BinaryWriter(File.OpenWrite(Output));
-            Binary.Write((byte) (((Convert.ToInt32(HasItems) << 0x1) & 0x1) | (Convert.ToInt32(OverrideMoves) & 0x1)));
-            Binary.Write(Class);
-            Binary.Write(BattleType);
-            Binary.Write((byte) Pkmn.Count);
-            for (var i = 0; i < Items.Count; ++i)
-                Binary.Write(Items[i]);
-            Binary.Write(AI);
-            if (Pkmn.Count > 0)
-            {
-                Binary.Write(IsHealer);
-                Binary.Write(Money);
-                Binary.Write(Prize);
+        public void serialize(List<TrainerPokémonEntry> pkmn, string output) {
+            var binary = new BinaryWriter(File.OpenWrite(output));
+            binary.Write((byte) (((Convert.ToInt32(setPkmnHeldItem) << 0x1) & 0x1) |
+                                 (Convert.ToInt32(setPkmnMoves) & 0x1)));
+            binary.Write(trainerClass);
+            binary.Write(battleType);
+            binary.Write((byte) pkmn.Count);
+            foreach (var t in items) binary.Write(t);
+            binary.Write(ai);
+            if (pkmn.Count > 0) {
+                binary.Write(isHealer);
+                binary.Write(money);
+                binary.Write(prize);
             }
 
-            Binary.Close();
+            binary.Close();
         }
     }
 }

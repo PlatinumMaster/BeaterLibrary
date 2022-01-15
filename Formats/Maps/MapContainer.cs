@@ -4,133 +4,136 @@ using System.IO;
 using System.Linq;
 using BeaterLibrary.Formats.Nitro;
 
-namespace BeaterLibrary.Formats.Maps
-{
-    public class MapContainer
-    {
-        public enum MagicLabels
-        {
-            WB = 0x4257,
-            GC = 0x4347,
-            NG = 0x474E,
-            RD = 0x4452
+namespace BeaterLibrary.Formats.Maps {
+    public class MapContainer {
+        public ushort magic { get; set; }
+        public MagicLabels containerType {
+            get;
+            set;
         }
 
-        private ushort nSections;
-
-        public MapContainer(ushort magic)
-        {
-            this.Magic = magic;
-            Model = new NitroSystemBinaryModel();
-            Permissions = new List<byte>();
-            Permissions2 = new List<byte>();
-            BuildingPositions = new List<byte>();
+        public NitroSystemBinaryModel model { get; set; }
+        public byte[] permissions { get; set; }
+        public byte[] permissions2 { get; set; }
+        public byte[] buildingPositions { get; set; }
+        public enum MagicLabels {
+            Wb = 0x4257,
+            Gc = 0x4347,
+            Ng = 0x474E,
+            Rd = 0x4452
         }
 
-        public MapContainer(BinaryReader Binary)
-        {
-            Model = new NitroSystemBinaryModel();
-            Permissions = new List<byte>();
-            Permissions2 = new List<byte>();
-            BuildingPositions = new List<byte>();
-            Magic = Binary.ReadUInt16();
-            nSections = Binary.ReadUInt16();
-            var ModelOffset = Binary.ReadUInt32();
-            uint PermissionTableOffset = 0, PermissionTable2Offset = 0, BuildingPosOffset = 0, FileSize = 0;
+        private ushort _nSections;
 
-            switch (ContainerType)
-            {
-                case MagicLabels.NG:
+        public MapContainer(ushort magic) {
+            this.magic = magic;
+            model = new NitroSystemBinaryModel();
+            permissions = new byte[] { };
+            permissions2 = new byte[] { };
+            buildingPositions = new byte[] { };
+        }
+
+        public MapContainer(byte[] data) {
+            BinaryReader binary = new BinaryReader(new MemoryStream(data));
+            model = new NitroSystemBinaryModel();
+            permissions = new byte[] { };
+            permissions2 = new byte[] { };
+            buildingPositions = new byte[] { };
+            magic = binary.ReadUInt16();
+            _nSections = binary.ReadUInt16();
+            var modelOffset = binary.ReadUInt32();
+            containerType = (MagicLabels) magic;
+            uint permissionTableOffset = 0, permissionTable2Offset = 0, buildingPosOffset = 0, fileSize = 0;
+
+            switch (containerType) {
+                case MagicLabels.Ng:
                     // Model and Building Positions
                     break;
-                case MagicLabels.RD:
-                case MagicLabels.WB:
+                case MagicLabels.Rd:
+                case MagicLabels.Wb:
                     // Model, Permission Table 1, and Building Positions
-                    PermissionTableOffset = Binary.ReadUInt32();
+                    permissionTableOffset = binary.ReadUInt32();
                     break;
-                case MagicLabels.GC:
+                case MagicLabels.Gc:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
-                    PermissionTableOffset = Binary.ReadUInt32();
-                    PermissionTable2Offset = Binary.ReadUInt32();
+                    permissionTableOffset = binary.ReadUInt32();
+                    permissionTable2Offset = binary.ReadUInt32();
                     break;
                 default:
-                    throw new Exception("Invalid magic");
+                    throw new Exception("Invalid magic.");
             }
 
-            BuildingPosOffset = Binary.ReadUInt32();
-            FileSize = Binary.ReadUInt32();
-            switch (ContainerType)
-            {
-                case MagicLabels.NG:
+            buildingPosOffset = binary.ReadUInt32();
+            fileSize = binary.ReadUInt32();
+            switch (containerType) {
+                case MagicLabels.Ng:
                     // Model and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (BuildingPosOffset - ModelOffset)));
-                    BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset)).ToList();
+                    model = new NitroSystemBinaryModel(binary.ReadBytes((int) (buildingPosOffset - modelOffset)));
+                    buildingPositions = binary.ReadBytes((int) (fileSize - buildingPosOffset));
                     break;
-                case MagicLabels.RD:
-                case MagicLabels.WB:
+                case MagicLabels.Rd:
+                case MagicLabels.Wb:
                     // Model, Permission Table 1, and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
-                    Permissions = Binary.ReadBytes((int) (BuildingPosOffset - PermissionTableOffset)).ToList();
-                    BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset)).ToList();
+                    model = new NitroSystemBinaryModel(binary.ReadBytes((int) (permissionTableOffset - modelOffset)));
+                    permissions = binary.ReadBytes((int) (buildingPosOffset - permissionTableOffset));
+                    buildingPositions = binary.ReadBytes((int) (fileSize - buildingPosOffset));
                     break;
-                case MagicLabels.GC:
+                case MagicLabels.Gc:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
-                    Permissions = Binary.ReadBytes((int) (PermissionTable2Offset - PermissionTableOffset)).ToList();
-                    Permissions2 = Binary.ReadBytes((int) (BuildingPosOffset - PermissionTable2Offset)).ToList();
-                    BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset)).ToList();
+                    model = new NitroSystemBinaryModel(binary.ReadBytes((int) (permissionTableOffset - modelOffset)));
+                    permissions = binary.ReadBytes((int) (permissionTable2Offset - permissionTableOffset));
+                    permissions2 = binary.ReadBytes((int) (buildingPosOffset - permissionTable2Offset));
+                    buildingPositions = binary.ReadBytes((int) (fileSize - buildingPosOffset));
                     break;
                 default:
                     throw new Exception("Invalid number of sections.");
             }
         }
 
-        public ushort Magic { get; set; }
+        public void updateContainerType() {
+            if (permissions.Length == 0 && permissions2.Length == 0) {
+                containerType = MagicLabels.Ng;
+            } else if (permissions.Length != 0 || permissions2.Length != 0) {
+                containerType = permissions.Length == 0x6004 ? MagicLabels.Rd : MagicLabels.Wb;
+            } else {
+                containerType = MagicLabels.Gc;
+            }
+        }
 
-        public MagicLabels ContainerType => (MagicLabels) Magic;
+        public void serialize(string path) {
+            _nSections = 2;
+            _nSections = permissions.Length <= 0 ? _nSections : (ushort) (_nSections + 1);
+            _nSections = permissions2.Length <= 0 ? _nSections : (ushort) (_nSections + 1);
 
-        public NitroSystemBinaryModel Model { get; set; }
-        public List<byte> Permissions { get; set; }
-        public List<byte> Permissions2 { get; set; }
-        public List<byte> BuildingPositions { get; set; }
-
-        public void Serialize(string path)
-        {
-            nSections = 2;
-            nSections = Permissions.Count <= 0 ? nSections : (ushort) (nSections + 1);
-            nSections = Permissions2.Count <= 0 ? nSections : (ushort) (nSections + 1);
-
-            switch (nSections)
-            {
+            switch (_nSections) {
                 case 2:
-                    Magic = (ushort) MagicLabels.NG;
+                    magic = (ushort) MagicLabels.Ng;
                     break;
                 case 3:
-                    Magic = Permissions.Count == 0x6004 ? (ushort) MagicLabels.RD : (ushort) MagicLabels.WB;
+                    magic = permissions.Length == 0x6004 ? (ushort) MagicLabels.Rd : (ushort) MagicLabels.Wb;
                     break;
                 case 4:
-                    Magic = (ushort) MagicLabels.GC;
+                    magic = (ushort) MagicLabels.Gc;
                     break;
             }
 
-            using (var b = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate)))
-            {
-                b.Write(Magic);
-                b.Write(nSections);
-                b.Write(0x4 * nSections + 0x8); // Location of model
-                if (Permissions.Count > 0)
-                    b.Write(0x4 * nSections + 0x8 + Model.Data.Length); // Location of Permissions table 1
-                if (Permissions2.Count > 0)
-                    b.Write(0x4 * nSections + 0x8 + Model.Data.Length +
-                            Permissions.Count); // Location of Permissions table 2
-                b.Write(0x4 * nSections + 0x8 + Model.Data.Length + Permissions.Count +
-                        Permissions2.Count); // Location of building positions
-                b.Write(0x4 * nSections + 0x8 + Model.Data.Length + Permissions.Count + Permissions2.Count +
-                        BuildingPositions.Count); // file size
-                b.Write(Model.Data);
-                b.Write(Permissions.ToArray());
-                b.Write(Permissions2.ToArray());
-                b.Write(BuildingPositions.ToArray());
+            using (var b = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate))) {
+                b.Write(magic);
+                b.Write(_nSections);
+                b.Write(0x4 * _nSections + 0x8); // Location of model
+                if (permissions.Length > 0)
+                    b.Write(0x4 * _nSections + 0x8 + model.data.Length); // Location of Permissions table 1
+                if (permissions2.Length > 0)
+                    b.Write(0x4 * _nSections + 0x8 + model.data.Length +
+                            permissions.Length); // Location of Permissions table 2
+                b.Write(0x4 * _nSections + 0x8 + model.data.Length + permissions.Length +
+                        permissions2.Length); // Location of building positions
+                b.Write(0x4 * _nSections + 0x8 + model.data.Length + permissions.Length + permissions2.Length +
+                        buildingPositions.Length); // file size
+                b.Write(model.data);
+                b.Write(permissions.ToArray());
+                b.Write(permissions2.ToArray());
+                b.Write(buildingPositions.ToArray());
             }
         }
     }

@@ -3,256 +3,230 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace BeaterLibrary.Parsing
-{
-    public class TextTokenizer
-    {
-        public TextTokenizer()
-        {
-            LineNumber = 1;
+namespace BeaterLibrary.Parsing {
+    public class TextTokenizer {
+        public TextTokenizer() {
+            lineNumber = 1;
         }
 
-        private int LineNumber { get; set; }
+        private int lineNumber { get; set; }
 
-        private void ThrowException(string reason)
-        {
-            throw new Exception($"Error on Line {LineNumber}: {reason}");
+        private void throwException(string reason) {
+            throw new Exception($"Error on Line {lineNumber}: {reason}");
         }
 
-        public List<List<AbstractSyntaxNode>> Tokenize(string text)
-        {
-            var TextArrays = new List<List<AbstractSyntaxNode>>();
-            var Input = new BidirectionalCharEnumerator(text);
+        public List<List<AbstractSyntaxNode>> tokenize(string text) {
+            var textArrays = new List<List<AbstractSyntaxNode>>();
+            var input = new BidirectionalCharEnumerator(text);
 
-            if (!Input.HasNext())
-                ThrowException("You gotta write something, c'mon.");
+            if (!input.hasNext())
+                throwException("You gotta write something, c'mon.");
 
-            while (Input.HasNext())
-            {
-                Input.MoveNext();
-                switch (Input.Current)
-                {
+            while (input.hasNext()) {
+                input.moveNext();
+                switch (input.current) {
                     case '#':
-                        ParseComment(Input);
+                        parseComment(input);
                         break;
                     case '\r':
-                        if (Environment.OSVersion.Platform != PlatformID.Unix)
-                        {
-                            if (!Input.HasNext())
-                                ThrowException("Standalone carriage return character not supported.");
-                            Input.MoveNext();
-                            if (Input.Current != '\n')
-                                ThrowException("Standalone carriage return character not supported.");
+                        if (Environment.OSVersion.Platform != PlatformID.Unix) {
+                            if (!input.hasNext())
+                                throwException("Standalone carriage return character not supported.");
+                            input.moveNext();
+                            if (input.current != '\n')
+                                throwException("Standalone carriage return character not supported.");
                         }
 
-                        LineNumber++;
+                        lineNumber++;
                         break;
                     case '\n':
-                        LineNumber++;
+                        lineNumber++;
                         break;
                     case ' ':
                         break;
                     case '[':
                     case '!':
-                        TextArrays.Add(TokenizeArray(Input));
+                        textArrays.Add(tokenizeArray(input));
                         break;
                     default:
-                        ThrowException($"Invalid character \"{Input.Current}\"");
+                        throwException($"Invalid character \"{input.current}\"");
                         break;
                 }
             }
 
-            return TextArrays;
+            return textArrays;
         }
 
-        private List<AbstractSyntaxNode> TokenizeArray(BidirectionalCharEnumerator Input)
-        {
-            var Nodes = new List<AbstractSyntaxNode>();
-            bool IsCompressed;
-            var EndReached = !Input.HasNext();
+        private List<AbstractSyntaxNode> tokenizeArray(BidirectionalCharEnumerator input) {
+            var nodes = new List<AbstractSyntaxNode>();
+            bool isCompressed;
+            var endReached = !input.hasNext();
 
-            if (EndReached)
-                ThrowException("Unexpected end of array.");
+            if (endReached)
+                throwException("Unexpected end of array.");
 
-            IsCompressed = Input.Current.Equals('!'); // Check if compressed string.
+            isCompressed = input.current.Equals('!'); // Check if compressed string.
 
-            if (IsCompressed)
-            {
-                Nodes.Add(new AbstractSyntaxNode(TextTokens.CompressionFlag, '!'));
-                Input.MoveNext();
+            if (isCompressed) {
+                nodes.Add(new AbstractSyntaxNode(TextTokens.CompressionFlag, '!'));
+                input.moveNext();
             }
 
-            if (!Input.Current.Equals('['))
-                ThrowException("Left bracket is missing.");
+            if (!input.current.Equals('['))
+                throwException("Left bracket is missing.");
 
-            Nodes.Add(new AbstractSyntaxNode(TextTokens.LeftBracket, '['));
+            nodes.Add(new AbstractSyntaxNode(TextTokens.LeftBracket, '['));
 
-            while (!EndReached && Input.MoveNext())
-                switch (Input.Current)
-                {
+            while (!endReached && input.moveNext())
+                switch (input.current) {
                     case '!':
-                        ThrowException("Only one compression operator is allowed.");
+                        throwException("Only one compression operator is allowed.");
                         break;
                     case '[':
                         // Beginning of the text array.
-                        ThrowException("Only a 1 dimensional array is allowed.");
+                        throwException("Only a 1 dimensional array is allowed.");
                         break;
                     case '"':
                         // Beginning of literal.
-                        var QuotationMarkNodes =
-                            Nodes.FindAll(x => x.Type == TextTokens.QuotationMark);
-                        if (QuotationMarkNodes.Count > 0)
-                        {
-                            List<AbstractSyntaxNode> OpenQuotationMarkNodes =
-                                    QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Open")),
-                                CloseQuotationMarkNodes =
-                                    QuotationMarkNodes.FindAll(x => x.Attribute.ToString().Equals("Close"));
+                        var quotationMarkNodes =
+                            nodes.FindAll(x => x.type == TextTokens.QuotationMark);
+                        if (quotationMarkNodes.Count > 0) {
+                            List<AbstractSyntaxNode> openQuotationMarkNodes =
+                                    quotationMarkNodes.FindAll(x => x.attribute.ToString().Equals("Open")),
+                                closeQuotationMarkNodes =
+                                    quotationMarkNodes.FindAll(x => x.attribute.ToString().Equals("Close"));
 
-                            if (OpenQuotationMarkNodes.Count != CloseQuotationMarkNodes.Count)
-                                ThrowException(
+                            if (openQuotationMarkNodes.Count != closeQuotationMarkNodes.Count)
+                                throwException(
                                     "One or more strings in the array were not terminated correctly with a quotation mark.");
-                            else if (Nodes[Nodes.Count - 1].Type != TextTokens.Comma)
-                                ThrowException("Strings containing multiple lines must be separated by a comma.");
+                            else if ((char) nodes[^1].value != 0xFFFE)
+                                throwException("Strings containing multiple lines must be separated by a comma.");
                         }
 
-                        Nodes.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {Attribute = "Open"});
-                        foreach (var Node in ParseLiteral(Input))
-                            Nodes.Add(Node);
+                        nodes.Add(new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {attribute = "Open"});
+                        foreach (var node in parseLiteral(input))
+                            nodes.Add(node);
                         break;
                     case ']':
                         // End of the text array.
-                        if (Nodes[Nodes.Count - 1].Type != TextTokens.QuotationMark)
-                            ThrowException("String was not terminated before using ']'.");
+                        if (nodes[nodes.Count - 1].type != TextTokens.QuotationMark)
+                            throwException("String was not terminated before using ']'.");
 
-                        var Last = Nodes.FindLast(x => x.Type == TextTokens.StringTerminator);
-                        if (Last == null)
-                            ThrowException(
-                                "You forgot to terminate the last string in the array with '$'. Please do so, or else your text will not save correctly.");
-
-                        Nodes.Add(new AbstractSyntaxNode(TextTokens.RightBracket, Input.Current));
-                        EndReached = !EndReached;
+                        nodes.Add(new AbstractSyntaxNode(TextTokens.RightBracket, input.current));
+                        endReached = !endReached;
                         break;
                     case ',':
                         // Comma, denoting the next literal.
-                        if (Nodes[Nodes.Count - 1].Type != TextTokens.QuotationMark)
-                            ThrowException("A comma should only be placed after a quotation mark.");
-                        Nodes.Add(new AbstractSyntaxNode(TextTokens.Comma, Input.Current));
+                        if (nodes[nodes.Count - 1].type != TextTokens.QuotationMark)
+                            throwException("A comma should only be placed after a quotation mark.");
+                        nodes.Add(new AbstractSyntaxNode(TextTokens.ControlCharacter, (char)0xFFFE));
                         break;
                     default:
                         // Never seen this character in my life.
-                        if (!char.IsWhiteSpace(Input.Current))
-                            ThrowException($"Unrecognized character \"{Input.Current}\".");
-                        if (Input.Current == '\r')
-                            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                            {
-                                if (!Input.HasNext())
-                                    ThrowException("Standalone carriage return character not supported.");
-                                Input.MoveNext();
-                                if (Input.Current != '\n')
-                                    ThrowException("Standalone carriage return character not supported.");
-                                LineNumber++;
+                        if (!char.IsWhiteSpace(input.current))
+                            throwException($"Unrecognized character \"{input.current}\".");
+                        if (input.current == '\r')
+                            if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+                                if (!input.hasNext())
+                                    throwException("Standalone carriage return character not supported.");
+                                input.moveNext();
+                                if (input.current != '\n')
+                                    throwException("Standalone carriage return character not supported.");
+                                lineNumber++;
                             }
 
                         break;
                 }
 
-            if (!EndReached)
-                ThrowException("Missing string array terminator.");
-            return Nodes;
+            if (!endReached)
+                throwException("Missing string array terminator.");
+            return nodes;
         }
 
-        private void ParseComment(BidirectionalCharEnumerator Input)
-        {
-            var EndReached = !Input.HasNext();
-            while (!EndReached && Input.MoveNext())
-                switch (Input.Current)
-                {
+        private void parseComment(BidirectionalCharEnumerator input) {
+            var endReached = !input.hasNext();
+            while (!endReached && input.moveNext())
+                switch (input.current) {
                     case '\r':
                     case '\n':
-                        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                        {
-                            if (!Input.HasNext())
-                                ThrowException("Unsupported: Carriage return character, but no newline character.");
-                            Input.MoveNext();
-                            if (Input.Current != '\n')
-                                ThrowException("Unsupported: Carriage return character, but no newline character.");
-                            LineNumber++;
+                        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+                            if (!input.hasNext())
+                                throwException("Unsupported: Carriage return character, but no newline character.");
+                            input.moveNext();
+                            if (input.current != '\n')
+                                throwException("Unsupported: Carriage return character, but no newline character.");
+                            lineNumber++;
                         }
 
-                        EndReached = !EndReached;
+                        endReached = !endReached;
                         break;
                 }
         }
 
-        private AbstractSyntaxNode ParseByteSequence(BidirectionalCharEnumerator Input)
-        {
-            var ByteSequence = new StringBuilder();
-            var ByteSequenceParsed = 0;
+        private AbstractSyntaxNode parseByteSequence(BidirectionalCharEnumerator input) {
+            var byteSequence = new StringBuilder();
+            var byteSequenceParsed = 0;
 
-            if (!Input.HasNext())
-                ThrowException(
+            if (!input.hasNext())
+                throwException(
                     "\"\\x\" is a reserved directive. It works fine without it being escaped. Remove the escape operator and try again.");
 
-            while (ByteSequenceParsed < 4 && Input.MoveNext())
-            {
-                if (char.IsLetter(Input.Current))
-                    if (char.ToLower(Input.Current) < 97 || char.ToLower(Input.Current) > 102)
-                        ThrowException("Not a valid hexadecimal character!");
-                    else if (char.IsDigit(Input.Current))
-                        if (Input.Current < 48 || Input.Current > 57)
-                            ThrowException("Not a valid hexadecimal character!");
-                ByteSequence.Append(Input.Current);
-                ByteSequenceParsed++;
+            while (byteSequenceParsed < 4 && input.moveNext()) {
+                if (char.IsLetter(input.current))
+                    if (char.ToLower(input.current) < 97 || char.ToLower(input.current) > 102)
+                        throwException("Not a valid hexadecimal character!");
+                    else if (char.IsDigit(input.current))
+                        if (input.current < 48 || input.current > 57)
+                            throwException("Not a valid hexadecimal character!");
+                byteSequence.Append(input.current);
+                byteSequenceParsed++;
             }
 
-            if (ByteSequenceParsed < 4)
-                ThrowException("Unexpected end of file.");
+            if (byteSequenceParsed < 4)
+                throwException("Unexpected end of file.");
 
             return new AbstractSyntaxNode(TextTokens.ByteSequence,
-                ushort.Parse(ByteSequence.ToString(), NumberStyles.HexNumber));
+                ushort.Parse(byteSequence.ToString(), NumberStyles.HexNumber));
         }
 
-        private List<AbstractSyntaxNode> ParseLiteral(BidirectionalCharEnumerator Input)
-        {
-            var TokenizedLiteral = new List<AbstractSyntaxNode>();
-            var EndReached = !Input.HasNext();
+        private List<AbstractSyntaxNode> parseLiteral(BidirectionalCharEnumerator input) {
+            var tokenizedLiteral = new List<AbstractSyntaxNode>();
+            var endReached = !input.hasNext();
 
-            if (EndReached)
-                ThrowException("Invalid literal.");
+            if (endReached)
+                throwException("Invalid literal.");
 
-            while (!EndReached && Input.MoveNext())
-                switch (Input.Current)
-                {
+            while (!endReached && input.moveNext())
+                switch (input.current) {
                     case '\\':
-                        if (!Input.HasNext())
-                            ThrowException("Ending quotation mark is missing.");
-                        Input.MoveNext();
+                        if (!input.hasNext())
+                            throwException("Ending quotation mark is missing.");
+                        input.moveNext();
                         // Check for control characters.
-                        switch (Input.Current)
-                        {
+                        switch (input.current) {
                             case 'c':
                                 // Macro for text clearing.
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xF000));
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xBE01));
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xF000));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xBE01));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));
                                 break;
                             case 'n':
                                 // Macro for new line.
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xFFFE));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xFFFE));
                                 break;
                             case 'l':
                                 // Macro for line scroll.
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xF000));
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xBE00));
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xF000));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0xBE00));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.ByteSequence, 0x0));
                                 break;
                             case 'x':
                                 // Macro for a byte sequence.
-                                TokenizedLiteral.Add(ParseByteSequence(Input));
+                                tokenizedLiteral.Add(parseByteSequence(input));
                                 break;
                             default:
                                 // Escaped character.
-                                TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, Input.Current));
+                                tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, input.current));
                                 break;
                         }
 
@@ -262,22 +236,22 @@ namespace BeaterLibrary.Parsing
                         break;
                     case '"':
                         // Delimiter for literal.
-                        TokenizedLiteral.Add(
-                            new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {Attribute = "Close"});
-                        EndReached = !EndReached;
+                        tokenizedLiteral.Add(
+                            new AbstractSyntaxNode(TextTokens.QuotationMark, '"') {attribute = "Close"});
+                        endReached = true;
                         break;
                     case '$':
-                        TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.StringTerminator, 0xFFFF));
+                        tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.StringTerminator, (char)0xFFFF));
                         break;
                     default:
-                        TokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, Input.Current));
+                        tokenizedLiteral.Add(new AbstractSyntaxNode(TextTokens.TextCharacter, input.current));
                         break;
                 }
 
-            if (!EndReached)
-                ThrowException("Missing string terminator.");
+            if (!endReached)
+                throwException("Missing string terminator.");
 
-            return TokenizedLiteral;
+            return tokenizedLiteral;
         }
     }
 }

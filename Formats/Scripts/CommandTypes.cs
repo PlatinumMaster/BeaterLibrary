@@ -1,12 +1,10 @@
-﻿namespace BeaterLibrary.Formats.Scripts
-{
-    public enum CommandTypes
-    {
+﻿namespace BeaterLibrary.Formats.Scripts {
+    public enum CommandTypes {
         Default,
         Call,
         ConditionalJump,
         Jump,
-        Actions,
+        ActionSequence,
         Return,
         End
     }

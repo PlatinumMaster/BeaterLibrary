@@ -1,25 +1,22 @@
 ﻿using System.IO;
+using BeaterLibrary.Formats.Overworld;
 
-namespace BeaterLibrary.Formats.Scripts
-{
-    public class   TriggerRelated
-    {
-        public TriggerRelated()
-        {
-            Variable = 0;
-            Value = 0;
-            ScriptID = 0;
+namespace BeaterLibrary.Formats.Scripts {
+    public class TriggerRelated : FieldObject {
+        public TriggerRelated() {
+            variable = 0;
+            value = 0;
+            scriptId = 0;
         }
 
-        public TriggerRelated(BinaryReader Binary)
-        {
-            Variable = Binary.ReadUInt16();
-            Value = Binary.ReadUInt16();
-            ScriptID = Binary.ReadUInt16();
+        public TriggerRelated(BinaryReader binary) {
+            variable = binary.ReadUInt16();
+            value = binary.ReadUInt16();
+            scriptId = binary.ReadUInt16();
         }
 
-        public ushort Variable { get; set; }
-        public ushort Value { get; set; }
-        public ushort ScriptID { get; set; }
+        public ushort variable { get; set; }
+        public ushort value { get; set; }
+        public ushort scriptId { get; set; }
     }
 }

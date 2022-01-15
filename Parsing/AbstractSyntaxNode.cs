@@ -1,15 +1,12 @@
-﻿namespace BeaterLibrary.Parsing
-{
-    public class AbstractSyntaxNode
-    {
-        public AbstractSyntaxNode(TextTokens Token, object Value)
-        {
-            Type = Token;
-            this.Value = Value;
+﻿namespace BeaterLibrary.Parsing {
+    public class AbstractSyntaxNode {
+        public AbstractSyntaxNode(TextTokens token, object value) {
+            type = token;
+            this.value = value;
         }
 
-        public TextTokens Type { get; }
-        public object Value { get; set; }
-        public object Attribute { get; set; }
+        public TextTokens type { get; }
+        public object value { get; set; }
+        public object attribute { get; set; }
     }
 }

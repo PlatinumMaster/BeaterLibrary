@@ -1,30 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace BeaterLibrary.Formats.Scripts
-{
-    public class ScriptMethod
-    {
-        public ScriptMethod(List<Command> Commands, int Address)
-        {
-            this.Commands = Commands;
-            this.Address = Address;
+namespace BeaterLibrary.Formats.Scripts {
+    public class ScriptMethod {
+        public ScriptMethod(List<Command> commands, int address) {
+            this.commands = commands;
+            this.address = address;
         }
 
-        public List<Command> Commands { get; set; }
+        public List<Command> commands { get; set; }
 
-        public int Address { get; set; }
+        public int address { get; set; }
 
-        public override string ToString()
-        {
-            return Commands.Aggregate("", (x, y) => string.Join(' ', x, $"\t{y}\n"));
-        }
+        public override string ToString() => commands.Aggregate("", (x, y) => string.Join(' ', x, $"\t{y}\n"));
     }
 
-    public class AnonymousScriptMethod : ScriptMethod
-    {
-        public AnonymousScriptMethod(List<Command> Commands, int Address) : base(Commands, Address)
-        {
-        }
+    public class AnonymousScriptMethod : ScriptMethod {
+        public AnonymousScriptMethod(List<Command> commands, int address) : base(commands, address) { }
     }
 }

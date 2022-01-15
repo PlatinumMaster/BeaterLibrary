@@ -1,51 +1,41 @@
-﻿namespace BeaterLibrary.Parsing
-{
-    public class BidirectionalCharEnumerator
-    {
-        private readonly string Data;
-        private int Index = -1;
+﻿namespace BeaterLibrary.Parsing {
+    public class BidirectionalCharEnumerator {
+        private readonly string _data;
+        private int _index = -1;
 
-        public BidirectionalCharEnumerator(string Data)
-        {
-            this.Data = Data;
+        public BidirectionalCharEnumerator(string data) {
+            _data = data;
         }
 
-        public char Current => Index >= 0 && Index < Data.Length ? Data[Index] : (char) 0;
+        public char current => _index >= 0 && _index < _data.Length ? _data[_index] : (char) 0;
 
-        public bool MoveNext()
-        {
-            return ++Index >= 0 && Index < Data.Length;
+        public bool moveNext() {
+            return ++_index >= 0 && _index < _data.Length;
         }
 
-        public bool MoveBack()
-        {
-            return --Index >= 0 && Index < Data.Length;
+        public bool moveBack() {
+            return --_index >= 0 && _index < _data.Length;
         }
 
-        public bool HasNext()
-        {
-            return Index + 1 >= 0 && Index + 1 < Data.Length;
+        public bool hasNext() {
+            return _index + 1 >= 0 && _index + 1 < _data.Length;
         }
 
-        public bool HasPrev()
-        {
-            return Index - 1 >= 0 && Index - 1 < Data.Length;
+        public bool hasPrev() {
+            return _index - 1 >= 0 && _index - 1 < _data.Length;
         }
 
-        public void Reset()
-        {
-            Index = -1;
+        public void reset() {
+            _index = -1;
         }
 
-        public char PeekNext()
-        {
-            if (HasNext())
-            {
-                char Data;
-                MoveNext();
-                Data = Current;
-                MoveBack();
-                return Data;
+        public char peekNext() {
+            if (hasNext()) {
+                char data;
+                moveNext();
+                data = current;
+                moveBack();
+                return data;
             }
 
             return (char) 9999;

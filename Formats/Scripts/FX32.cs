@@ -1,6 +1,4 @@
-﻿namespace BeaterLibrary.Formats.Scripts
-{
-    internal class FX32
-    {
+﻿namespace BeaterLibrary.Formats.Scripts {
+    internal class FX32 {
     }
 }

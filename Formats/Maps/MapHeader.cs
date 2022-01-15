@@ -2,206 +2,193 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BeaterLibrary.Formats.Maps
-{
-    public class MapHeaders
-    {
-        public MapHeaders()
-        {
-            Headers = new List<MapHeader>();
+namespace BeaterLibrary.Formats.Maps {
+    public class MapHeaders {
+        public MapHeaders() {
+            headers = new List<MapHeader>();
         }
 
-        public MapHeaders(byte[] Data) : this()
-        {
-            var Binary = new BinaryReader(new MemoryStream(Data));
-            ReadHeaders(Binary);
-            Binary.Close();
+        public MapHeaders(byte[] data) : this() {
+            var binary = new BinaryReader(new MemoryStream(data));
+            readHeaders(binary);
+            binary.Close();
         }
 
-        public MapHeaders(string path) : this()
-        {
-            var Binary = new BinaryReader(File.OpenRead(path));
-            ReadHeaders(Binary);
-            Binary.Close();
+        public MapHeaders(string path) : this() {
+            var binary = new BinaryReader(File.OpenRead(path));
+            readHeaders(binary);
+            binary.Close();
         }
 
-        public List<MapHeader> Headers { get; }
+        public List<MapHeader> headers { get; }
 
-        private void ReadHeaders(BinaryReader Binary)
-        {
-            for (var i = 0; i < Binary.BaseStream.Length / 0x30; ++i)
-                Headers.Add(new MapHeader(i, Binary));
+        private void readHeaders(BinaryReader binary) {
+            for (var i = 0; i < binary.BaseStream.Length / 0x30; ++i)
+                headers.Add(new MapHeader(i, binary));
         }
 
-        public void Serialize(string path)
-        {
-            var Binary = new BinaryWriter(File.OpenWrite(path));
-            Headers.ForEach(x => x.Serialize(Binary));
-            Binary.Close();
+        public void serialize(string path) {
+            var binary = new BinaryWriter(File.OpenWrite(path));
+            headers.ForEach(x => x.serialize(binary));
+            binary.Close();
         }
 
-        public static void Serialize(List<MapHeader> Headers, string path)
-        {
-            var Binary = new BinaryWriter(File.OpenWrite(path));
-            Headers.ForEach(x => x.Serialize(Binary));
-            Binary.Close();
+        public static void serialize(List<MapHeader> headers, string path) {
+            var binary = new BinaryWriter(File.OpenWrite(path));
+            headers.ForEach(x => x.serialize(binary));
+            binary.Close();
         }
     }
 
-    public class MapHeader
-    {
-        public MapHeader(int Index)
-        {
-            this.Index = Index;
+    public class MapHeader {
+        public MapHeader(int index) {
+            this.index = index;
         }
 
-        public MapHeader(int Index, BinaryReader Binary) : this(Index)
-        {
-            MapType = Binary.ReadByte();
-            MapChange = Binary.ReadByte();
+        public MapHeader(int index, BinaryReader binary) : this(index) {
+            mapType = binary.ReadByte();
+            mapChange = binary.ReadByte();
 
-            TextureContainerIndex = Binary.ReadUInt16();
-            MapMatrixIndex = Binary.ReadUInt16();
-            MapScriptsIndex = Binary.ReadUInt16();
-            InitializationScriptsIndex = Binary.ReadUInt16();
-            TextContainerIndex = Binary.ReadUInt16();
+            textureContainerIndex = binary.ReadUInt16();
+            mapMatrixIndex = binary.ReadUInt16();
+            mapScriptsIndex = binary.ReadUInt16();
+            initializationScriptsIndex = binary.ReadUInt16();
+            textContainerIndex = binary.ReadUInt16();
 
-            SpringBGM = Binary.ReadUInt16();
-            SummerBGM = Binary.ReadUInt16();
-            AutumnBGM = Binary.ReadUInt16();
-            WinterBGM = Binary.ReadUInt16();
+            springBgm = binary.ReadUInt16();
+            summerBgm = binary.ReadUInt16();
+            autumnBgm = binary.ReadUInt16();
+            winterBgm = binary.ReadUInt16();
 
-            WildPokemonContainerIndex = Binary.ReadUInt16();
-            Unknown = (ushort) ((WildPokemonContainerIndex >> 0xD) & 0x7);
-            WildPokemonContainerIndex &= 0x1FFF;
+            wildPokemonContainerIndex = binary.ReadUInt16();
+            unknown = (ushort) ((wildPokemonContainerIndex >> 0xD) & 0x7);
+            wildPokemonContainerIndex &= 0x1FFF;
 
-            ZoneID = Binary.ReadUInt16();
-            ParentZoneID = Binary.ReadUInt16();
+            zoneId = binary.ReadUInt16();
+            parentZoneId = binary.ReadUInt16();
 
-            NameIndex = Binary.ReadUInt16();
-            NameDisplayType = (byte) ((NameIndex >> 0xA) & 0x3F);
-            NameIndex &= 0x3FF;
+            nameIndex = binary.ReadUInt16();
+            nameDisplayType = (byte) ((nameIndex >> 0xA) & 0x3F);
+            nameIndex &= 0x3FF;
 
-            var EnvironmentFlags = Binary.ReadUInt16();
-            WeatherFlags = EnvironmentFlags & 0x3F;
-            UnknownFlag = (EnvironmentFlags >> 0x6) & 0x7;
-            CameraIndex = (EnvironmentFlags >> 0x9) & 0x7F;
+            var environmentFlags = binary.ReadUInt16();
+            weatherFlags = environmentFlags & 0x3F;
+            unknownFlag = (environmentFlags >> 0x6) & 0x7;
+            cameraIndex = (environmentFlags >> 0x9) & 0x7F;
 
-            FlagsAndBackground = Binary.ReadUInt16();
-            Smth = FlagsAndBackground & 0x1F;
-            BattleBackground = (FlagsAndBackground >> 5) & 0xF;
-            CanBike = Convert.ToBoolean((FlagsAndBackground >> 10) & 1);
-            CanRun = Convert.ToBoolean((FlagsAndBackground >> 11) & 1);
-            CanEscapeRope = Convert.ToBoolean((FlagsAndBackground >> 12) & 1);
-            CanFly = Convert.ToBoolean((FlagsAndBackground >> 13) & 1);
-            IsBGMChangeEnabled = Convert.ToBoolean((FlagsAndBackground >> 14) & 1);
-            UnknownBool = Convert.ToBoolean((FlagsAndBackground >> 15) & 1);
-            
-            MatrixCameraBoundary = Binary.ReadUInt16();
-            NameIcon = Binary.ReadUInt16();
-            Unknown2 = (NameIcon >> 0xD) & 0x7;
-            NameIcon &= 0x1FFF;
+            flagsAndBackground = binary.ReadUInt16();
+            smth = flagsAndBackground & 0x1F;
+            battleBackground = (flagsAndBackground >> 5) & 0xF;
+            canBike = Convert.ToBoolean((flagsAndBackground >> 10) & 1);
+            canRun = Convert.ToBoolean((flagsAndBackground >> 11) & 1);
+            canEscapeRope = Convert.ToBoolean((flagsAndBackground >> 12) & 1);
+            canFly = Convert.ToBoolean((flagsAndBackground >> 13) & 1);
+            isBgmChangeEnabled = Convert.ToBoolean((flagsAndBackground >> 14) & 1);
+            unknownBool = Convert.ToBoolean((flagsAndBackground >> 15) & 1);
 
-            Fly_X = Binary.ReadUInt32();
-            Fly_Z = Binary.ReadInt32();
-            Fly_Y = Binary.ReadUInt32();
+            matrixCameraBoundary = binary.ReadUInt16();
+            nameIcon = binary.ReadUInt16();
+            unknown2 = (nameIcon >> 0xD) & 0x7;
+            nameIcon &= 0x1FFF;
+
+            flyX = binary.ReadUInt32();
+            flyZ = binary.ReadInt32();
+            flyY = binary.ReadUInt32();
         }
 
-        public int BattleBackground { get; set; }
+        public int battleBackground { get; set; }
 
-        public int Smth { get; set; }
-        public bool CanBike { get; set; }
-        public bool CanRun { get; set; }
-        public bool CanEscapeRope { get; set; }
-        public bool CanFly { get; set; }
-        public bool IsBGMChangeEnabled { get; set; }
-        public bool UnknownBool { get; set; }
-        public int Index { get; set; }
-        public byte MapType { get; set; }
-        public byte MapChange { get; set; }
-        public ushort TextureContainerIndex { get; set; }
-        public uint Fly_Y { get; set; }
-        public int Fly_Z { get; set; }
+        public int smth { get; set; }
+        public bool canBike { get; set; }
+        public bool canRun { get; set; }
+        public bool canEscapeRope { get; set; }
+        public bool canFly { get; set; }
+        public bool isBgmChangeEnabled { get; set; }
+        public bool unknownBool { get; set; }
+        public int index { get; set; }
+        public byte mapType { get; set; }
+        public byte mapChange { get; set; }
+        public ushort textureContainerIndex { get; set; }
+        public uint flyY { get; set; }
+        public int flyZ { get; set; }
 
-        public uint Fly_X { get; set; }
-        public int Unknown2 { get; set; }
+        public uint flyX { get; set; }
+        public int unknown2 { get; set; }
 
-        public ushort NameIcon { get; set; }
+        public ushort nameIcon { get; set; }
 
-        public ushort MatrixCameraBoundary { get; set; }
+        public ushort matrixCameraBoundary { get; set; }
 
-        public ushort FlagsAndBackground { get; set; }
+        public ushort flagsAndBackground { get; set; }
 
-        public int CameraIndex { get; set; }
+        public int cameraIndex { get; set; }
 
-        public int UnknownFlag { get; set; }
+        public int unknownFlag { get; set; }
 
-        public int WeatherFlags { get; set; }
+        public int weatherFlags { get; set; }
 
-        public byte NameDisplayType { get; set; }
+        public byte nameDisplayType { get; set; }
 
-        public ushort NameIndex { get; set; }
+        public ushort nameIndex { get; set; }
 
-        public ushort ParentZoneID { get; set; }
+        public ushort parentZoneId { get; set; }
 
-        public ushort ZoneID { get; set; }
+        public ushort zoneId { get; set; }
 
-        public ushort Unknown { get; set; }
+        public ushort unknown { get; set; }
 
-        public ushort WildPokemonContainerIndex { get; set; }
+        public ushort wildPokemonContainerIndex { get; set; }
 
-        public ushort WinterBGM { get; set; }
+        public ushort winterBgm { get; set; }
 
-        public ushort AutumnBGM { get; set; }
+        public ushort autumnBgm { get; set; }
 
-        public ushort SummerBGM { get; set; }
+        public ushort summerBgm { get; set; }
 
-        public ushort SpringBGM { get; set; }
+        public ushort springBgm { get; set; }
 
-        public ushort TextContainerIndex { get; set; }
+        public ushort textContainerIndex { get; set; }
 
-        public ushort InitializationScriptsIndex { get; set; }
+        public ushort initializationScriptsIndex { get; set; }
 
-        public ushort MapScriptsIndex { get; set; }
+        public ushort mapScriptsIndex { get; set; }
 
-        public ushort MapMatrixIndex { get; set; }
+        public ushort mapMatrixIndex { get; set; }
 
 
-        public void Serialize(BinaryWriter Binary)
-        {
-            Binary.Write(MapType);
-            Binary.Write(MapChange);
-            Binary.Write(TextureContainerIndex);
-            Binary.Write(MapMatrixIndex);
-            Binary.Write(MapScriptsIndex);
-            Binary.Write(InitializationScriptsIndex);
-            Binary.Write(TextContainerIndex);
-            Binary.Write(SpringBGM);
-            Binary.Write(SummerBGM);
-            Binary.Write(AutumnBGM);
-            Binary.Write(WinterBGM);
-            Binary.Write((ushort) (WildPokemonContainerIndex | (Unknown << 0xD)));
-            Binary.Write(ZoneID);
-            Binary.Write(ParentZoneID);
-            Binary.Write((ushort) (NameIndex | (NameDisplayType << 0xA)));
-            Binary.Write((ushort) (WeatherFlags | (UnknownFlag << 0x6) | (CameraIndex << 0x9)));
-            Binary.Write((ushort)((Smth & 0x1F) | ((BattleBackground & 0xFF) << 5) |
-                         ((Convert.ToUInt32(CanBike) & 1) << 10) |
-                         ((Convert.ToUInt32(CanRun) & 1) << 11) |
-                         ((Convert.ToUInt32(CanEscapeRope) & 1) << 12) |
-                         ((Convert.ToUInt32(CanFly) & 1) << 13) |
-                         ((Convert.ToUInt32(IsBGMChangeEnabled) & 1) << 14) |
-                         ((Convert.ToUInt32(UnknownBool) & 1) << 15)));
-            Binary.Write(MatrixCameraBoundary);
-            Binary.Write((ushort) (NameIcon | (Unknown2 << 0xD)));
-            Binary.Write(Fly_X);
-            Binary.Write(Fly_Z);
-            Binary.Write(Fly_Y);
+        public void serialize(BinaryWriter binary) {
+            binary.Write(mapType);
+            binary.Write(mapChange);
+            binary.Write(textureContainerIndex);
+            binary.Write(mapMatrixIndex);
+            binary.Write(mapScriptsIndex);
+            binary.Write(initializationScriptsIndex);
+            binary.Write(textContainerIndex);
+            binary.Write(springBgm);
+            binary.Write(summerBgm);
+            binary.Write(autumnBgm);
+            binary.Write(winterBgm);
+            binary.Write((ushort) (wildPokemonContainerIndex | (unknown << 0xD)));
+            binary.Write(zoneId);
+            binary.Write(parentZoneId);
+            binary.Write((ushort) (nameIndex | (nameDisplayType << 0xA)));
+            binary.Write((ushort) (weatherFlags | (unknownFlag << 0x6) | (cameraIndex << 0x9)));
+            binary.Write((ushort) ((smth & 0x1F) | ((battleBackground & 0xFF) << 5) |
+                                   ((Convert.ToUInt32(canBike) & 1) << 10) |
+                                   ((Convert.ToUInt32(canRun) & 1) << 11) |
+                                   ((Convert.ToUInt32(canEscapeRope) & 1) << 12) |
+                                   ((Convert.ToUInt32(canFly) & 1) << 13) |
+                                   ((Convert.ToUInt32(isBgmChangeEnabled) & 1) << 14) |
+                                   ((Convert.ToUInt32(unknownBool) & 1) << 15)));
+            binary.Write(matrixCameraBoundary);
+            binary.Write((ushort) (nameIcon | (unknown2 << 0xD)));
+            binary.Write(flyX);
+            binary.Write(flyZ);
+            binary.Write(flyY);
         }
 
-        public override string ToString()
-        {
-            return $"Zone {Index}";
+        public override string ToString() {
+            return $"Zone {index}";
         }
     }
 }

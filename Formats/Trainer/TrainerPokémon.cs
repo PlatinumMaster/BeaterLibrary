@@ -1,103 +1,97 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using BeaterLibrary.Parsing;
 
-namespace BeaterLibrary.Formats.Trainer
-{
-    public class TrainerPokémonEntry
-    {
-        public TrainerPokémonEntry(bool HasMoves, bool HasItem)
-        {
-            Moves = new List<ushort> {0, 0, 0, 0};
-            IV = 0;
-            PID = 0;
-            Level = 0;
-            Species = 0;
-            Form = 0;
-            HeldItem = 0;
+namespace BeaterLibrary.Formats.Trainer {
+    public class TrainerPokémonEntry {
+        public TrainerPokémonEntry(bool pkmnSetMoves, bool pkmnSetHeldItem) {
+            moves = new List<ushort> {0, 0, 0, 0};
+            iv = 0;
+            pid = 0;
+            level = 0;
+            species = 0;
+            form = 0;
+            heldItem = 0;
         }
 
-        public TrainerPokémonEntry(BinaryReader Binary, bool HasMoves, bool HasItem)
-        {
-            Moves = new List<ushort> {0, 0, 0, 0};
-            IV = Binary.ReadByte();
-            PID = Binary.ReadByte();
-            Ability = PID >> 4;
-            Gender = PID & 3;
-            uBit = (PID >> 3) & 1;
-            Level = Binary.ReadUInt16();
-            Species = Binary.ReadUInt16();
-            Form = Binary.ReadUInt16();
-            if (HasItem)
-                HeldItem = Binary.ReadUInt16();
-            if (HasMoves)
+        public TrainerPokémonEntry(byte[] data, bool pkmnSetMoves, bool pkmnSetHeldItem) {
+            var binary = new BinaryReaderEx(data);
+            moves = new List<ushort> {0, 0, 0, 0};
+            heldItem = 0;
+            iv = binary.ReadByte();
+            pid = binary.ReadByte();
+            ability = pid >> 4;
+            gender = pid & 3;
+            uBit = (pid >> 3) & 1;
+            level = binary.ReadUInt16();
+            species = binary.ReadUInt16();
+            form = binary.ReadUInt16();
+            if (pkmnSetHeldItem) 
+                heldItem = binary.ReadUInt16();
+            if (pkmnSetMoves)
                 for (var i = 0; i < 4; ++i)
-                    Moves.Add(Binary.ReadUInt16());
+                    moves.Add(binary.ReadUInt16());
         }
 
-        public byte IV { get; set; }
-        public byte PID { get; set; }
-        public ushort Level { get; set; }
-        public ushort Species { get; set; }
-        public ushort Form { get; set; }
-        public ushort HeldItem { get; set; }
-        public List<ushort> Moves { get; set; }
-        public int Ability { get; set; }
-        public int Gender { get; set; }
+        public byte iv { get; set; }
+        public byte pid { get; set; }
+        public ushort level { get; set; }
+        public ushort species { get; set; }
+        public ushort form { get; set; }
+        public ushort heldItem { get; set; }
+        public List<ushort> moves { get; set; }
+        public int ability { get; set; }
+        public int gender { get; set; }
         public int uBit { get; set; }
 
-        public void Serialize(bool HasMoves, bool HasItem, BinaryWriter Binary)
-        {
-            Binary.Write(IV);
-            Binary.Write((byte) (((Ability & 0xF) << 4) | ((uBit & 1) << 3) | (Gender & 0x7)));
-            Binary.Write(Level);
-            Binary.Write(Species);
-            Binary.Write(Form);
-            if (HasItem)
-                Binary.Write(HeldItem);
-            if (HasMoves)
-                for (var i = 0; i < 4; ++i)
-                    Binary.Write(Moves[i]);
+        public void serialize(bool pkmnSetMoves, bool pkmnSetHeldItem, BinaryWriter binary) {
+            binary.Write(iv);
+            binary.Write((byte) (((ability & 0xF) << 4) | ((uBit & 1) << 3) | (gender & 0x7)));
+            binary.Write(level);
+            binary.Write(species);
+            binary.Write(form);
+            if (pkmnSetHeldItem) binary.Write(heldItem);
+            if (pkmnSetMoves)
+                foreach (var m in moves)
+                    binary.Write(m);
         }
 
-        public override string ToString()
-        {
-            return $"Pokémon #{Species}\nLevel: {Level}\nForm: {Form}\n";
+        public override string ToString() {
+            return $"Pokémon #{species}\nLevel: {level}\nForm: {form}\n";
         }
     }
 
-    public class TrainerPokémonEntries
-    {
-        public TrainerPokémonEntries(BinaryReader Binary, bool HasMoves, int NumberOfPokemon, bool HasItem)
-        {
-            PokémonEntries = new List<TrainerPokémonEntry>();
-            for (var i = 0; i < NumberOfPokemon; ++i)
-                PokémonEntries.Add(new TrainerPokémonEntry(Binary, HasMoves, HasItem));
+    public class TrainerPokémonEntries {
+        public TrainerPokémonEntries(byte[] data, bool pkmnSetMoves, int numberOfPokemon, bool pkmnSetHeldItem) {
+            pokémonEntries = new List<TrainerPokémonEntry>();
+            for (int i = 0, dataSize = 0x8 + (pkmnSetMoves ? 0x8 : 0x0) + (pkmnSetHeldItem ? 0x2 : 0x0); i < numberOfPokemon; ++i) {
+                pokémonEntries.Add(new TrainerPokémonEntry(data.Skip(dataSize * i).Take(dataSize).ToArray(), pkmnSetMoves,
+                    pkmnSetHeldItem));
+            }
         }
 
-        public List<TrainerPokémonEntry> PokémonEntries { get; }
+        public List<TrainerPokémonEntry> pokémonEntries { get; }
 
-        public void AddPokémonEntry(TrainerPokémonEntry Entry)
-        {
-            if (PokémonEntries.Count != 6)
-                PokémonEntries.Add(Entry);
+        public void addPokémonEntry(TrainerPokémonEntry entry) {
+            if (pokémonEntries.Count != 6)
+                pokémonEntries.Add(entry);
             else
-                throw new Exception("Lmao you ain't shit Ghetsis bruh nice try");
+                throw new Exception("You can only have 6 Pokémon in your party.");
         }
 
-        public void Serialize(bool HasMoves, bool HasItem, string Output)
-        {
-            var Binary = new BinaryWriter(File.OpenWrite(Output));
-            PokémonEntries.ForEach(Entry => Entry.Serialize(HasMoves, HasItem, Binary));
-            Binary.Close();
+        public void serialize(bool pkmnSetMoves, bool pkmnSetHeldItem, string output) {
+            var binary = new BinaryWriter(File.OpenWrite(output));
+            pokémonEntries.ForEach(entry => entry.serialize(pkmnSetMoves, pkmnSetHeldItem, binary));
+            binary.Close();
         }
 
-        public static void Serialize(List<TrainerPokémonEntry> PokémonEntriesList, bool HasMoves, bool HasItem,
-            string Output)
-        {
-            var Binary = new BinaryWriter(File.OpenWrite(Output));
-            PokémonEntriesList.ForEach(Entry => Entry.Serialize(HasMoves, HasItem, Binary));
-            Binary.Close();
+        public static void serialize(List<TrainerPokémonEntry> pokémonEntriesList, bool pkmnSetMoves,
+            bool pkmnSetHeldItem, string output) {
+            var binary = new BinaryWriter(File.OpenWrite(output));
+            pokémonEntriesList.ForEach(entry => entry.serialize(pkmnSetMoves, pkmnSetHeldItem, binary));
+            binary.Close();
         }
     }
 }

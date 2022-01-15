@@ -1,85 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\Scripts\B2W2.yml" />
-    <None Remove="Resources\Scripts\BW.yml" />
-    <None Remove="Resources\Scripts\HGSS.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl50.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl51.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl52.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl53.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl54.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl55_ovl56.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl55_ovl57.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl58_ovl59.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl61.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl62.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl63.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl64.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl65.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl66.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl67.yml" />
-    <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl68.yml" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Resources\Scripts\B2W2.yml" />
+        <None Remove="Resources\Scripts\BW.yml" />
+        <None Remove="Resources\Scripts\HGSS.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl50.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl51.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl52.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl53.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl54.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl55_ovl56.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl55_ovl57.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl58_ovl59.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl61.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl62.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl63.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl64.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl65.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl66.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl67.yml" />
+        <None Remove="Resources\Scripts\OverlayPlugins\B2W2\ovl68.yml" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Resources\Scripts\B2W2.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\BW.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\HGSS.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl50.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl51.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl52.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl53.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl54.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl61.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl62.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl63.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl64.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl65.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl66.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl67.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scripts\OverlayPlugins\B2W2\ovl68.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="0.10.4" />
+        <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.32" />
+        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.32" />
-    <PackageReference Include="YamlDotNet" Version="8.1.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Resources\Scripts\B2W2" />
+    </ItemGroup>
 
 </Project>

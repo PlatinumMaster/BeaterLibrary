@@ -1,40 +1,36 @@
 ﻿using System;
 using System.IO;
 
-namespace BeaterLibrary.Formats.Overworld
-{
+namespace BeaterLibrary.Formats.Overworld {
     [Serializable]
-    public class Interactable
-    {
-        public Interactable()
-        {
-            Script = 0;
-            Condition = 0;
-            Interactibility = 0;
-            RailIndex = 0;
-            X = 0;
-            Y = 0;
-            Z = 0;
+    public class Interactable : FieldObject {
+        public Interactable() {
+            script = 0;
+            condition = 0;
+            interactibility = 0;
+            railIndex = 0;
+            x = 0;
+            y = 0;
+            z = 0;
         }
 
-        public Interactable(BinaryReader b)
-        {
-            Script = b.ReadUInt16();
-            Condition = b.ReadUInt16();
-            Interactibility = b.ReadUInt16();
-            RailIndex = b.ReadUInt16();
-            X = b.ReadUInt32();
-            Y = b.ReadUInt32();
-            Z = b.ReadInt32() / 0x10;
+        public Interactable(BinaryReader b) {
+            script = b.ReadUInt16();
+            condition = b.ReadUInt16();
+            interactibility = b.ReadUInt16();
+            railIndex = b.ReadUInt16();
+            x = b.ReadUInt32();
+            y = b.ReadUInt32();
+            z = b.ReadInt32() / 0x10;
         }
 
-        public ushort Script { get; set; }
-        public ushort Condition { get; set; }
-        public ushort Interactibility { get; set; }
-        public ushort RailIndex { get; set; }
-        public uint X { get; set; }
-        public uint Y { get; set; }
-        public int Z { get; set; }
-        public static uint Size => 0x14;
+        public ushort script { get; set; }
+        public ushort condition { get; set; }
+        public ushort interactibility { get; set; }
+        public ushort railIndex { get; set; }
+        public uint x { get; set; }
+        public uint y { get; set; }
+        public int z { get; set; }
+        public static uint size => 0x14;
     }
 }

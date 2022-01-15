@@ -1,30 +1,25 @@
 ﻿using System.IO;
 
-namespace BeaterLibrary.Formats.Scripts
-{
-    public class Action
-    {
-        public Action(BinaryReader Binary)
-        {
-            ID = Binary.ReadUInt16();
-            Duration = Binary.ReadUInt16();
-            Name = ID.ToString();
+namespace BeaterLibrary.Formats.Scripts {
+    public class Action {
+        public Action(BinaryReader binary) {
+            id = binary.ReadUInt16();
+            duration = binary.ReadUInt16();
+            name = id.ToString();
         }
 
-        public Action(string name, ushort id, ushort duration)
-        {
-            Name = name;
-            ID = id;
-            Duration = duration;
+        public Action(string name, ushort id, ushort duration) {
+            this.name = name;
+            this.id = id;
+            this.duration = duration;
         }
 
-        public string Name { get; set; }
-        private ushort Duration { get; }
-        public ushort ID { get; set; }
+        public string name { get; set; }
+        private ushort duration { get; }
+        public ushort id { get; set; }
 
-        public override string ToString()
-        {
-            return ID == 0xFE ? Name : $"Action 0x{ID:X}, 0x{Duration:X}";
+        public override string ToString() {
+            return id == 0xFE ? name : $"Action 0x{id:X}, 0x{duration:X}";
         }
     }
 }

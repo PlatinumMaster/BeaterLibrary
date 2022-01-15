@@ -1,7 +1,5 @@
-﻿namespace BeaterLibrary.Parsing
-{
-    public enum TextTokens
-    {
+﻿namespace BeaterLibrary.Parsing {
+    public enum TextTokens {
         LeftBracket,
         RightBracket,
         LeftBrace,
