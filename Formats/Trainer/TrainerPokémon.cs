@@ -32,7 +32,7 @@ namespace BeaterLibrary.Formats.Trainer {
                 heldItem = binary.ReadUInt16();
             if (pkmnSetMoves)
                 for (var i = 0; i < 4; ++i)
-                    moves.Add(binary.ReadUInt16());
+                    moves[i] = binary.ReadUInt16();
         }
 
         public byte iv { get; set; }
@@ -52,7 +52,8 @@ namespace BeaterLibrary.Formats.Trainer {
             binary.Write(level);
             binary.Write(species);
             binary.Write(form);
-            if (pkmnSetHeldItem) binary.Write(heldItem);
+            if (pkmnSetHeldItem) 
+                binary.Write(heldItem);
             if (pkmnSetMoves)
                 foreach (var m in moves)
                     binary.Write(m);
