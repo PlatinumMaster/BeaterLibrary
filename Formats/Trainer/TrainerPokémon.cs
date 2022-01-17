@@ -6,7 +6,7 @@ using BeaterLibrary.Parsing;
 
 namespace BeaterLibrary.Formats.Trainer {
     public class TrainerPokémonEntry {
-        public TrainerPokémonEntry(bool pkmnSetMoves, bool pkmnSetHeldItem) {
+        public TrainerPokémonEntry() {
             moves = new List<ushort> {0, 0, 0, 0};
             iv = 0;
             pid = 0;
@@ -65,24 +65,43 @@ namespace BeaterLibrary.Formats.Trainer {
     }
 
     public class TrainerPokémonEntries {
-        public TrainerPokémonEntries(byte[] data, bool pkmnSetMoves, int numberOfPokemon, bool pkmnSetHeldItem) {
-            pokémonEntries = new List<TrainerPokémonEntry>();
+        public bool pkmnSetMoves { get; set; }
+        public bool pkmnSetHeldItem { get; set; }
+        public TrainerPokémonEntries(byte[] data, bool pkmnSetMoves, int numberOfPokemon, bool pkmnSetHeldItem) : this(pkmnSetMoves, pkmnSetHeldItem) {
             for (int i = 0, dataSize = 0x8 + (pkmnSetMoves ? 0x8 : 0x0) + (pkmnSetHeldItem ? 0x2 : 0x0); i < numberOfPokemon; ++i) {
                 pokémonEntries.Add(new TrainerPokémonEntry(data.Skip(dataSize * i).Take(dataSize).ToArray(), pkmnSetMoves,
                     pkmnSetHeldItem));
             }
         }
-
-        public List<TrainerPokémonEntry> pokémonEntries { get; }
-
-        public void addPokémonEntry(TrainerPokémonEntry entry) {
-            if (pokémonEntries.Count != 6)
-                pokémonEntries.Add(entry);
-            else
-                throw new Exception("You can only have 6 Pokémon in your party.");
+        public TrainerPokémonEntries(bool pkmnSetMoves, bool pkmnSetHeldItem) {
+            pokémonEntries = new List<TrainerPokémonEntry>();
         }
 
-        public void serialize(bool pkmnSetMoves, bool pkmnSetHeldItem, string output) {
+        public List<TrainerPokémonEntry> pokémonEntries { get; set; }
+
+        public void addPokémonEntry(TrainerPokémonEntry entry, int Index) {
+            if (pokémonEntries.Count != 6) {
+                if (Index == -1 || Index > pokémonEntries.Count) {
+                    pokémonEntries.Add(entry);
+                } else {
+                    pokémonEntries.Insert(Index, entry);
+                }
+            } else {
+                throw new Exception("Trainers can have up to 6 Pokémon.");
+            }
+        }
+        
+        public void removePokémonEntry(int Index) {
+            if (pokémonEntries.Count > 0) {
+                if (Index != -1) {
+                    pokémonEntries.RemoveAt(Index);
+                }
+            } else {
+                throw new Exception("Trainers cannot have less than 0 Pokémon.");
+            }
+        }
+
+        public void serialize(string output) {
             var binary = new BinaryWriter(File.OpenWrite(output));
             pokémonEntries.ForEach(entry => entry.serialize(pkmnSetMoves, pkmnSetHeldItem, binary));
             binary.Close();

@@ -51,19 +51,19 @@ namespace BeaterLibrary.Formats.Trainer {
 
         public void serialize(List<TrainerPokémonEntry> pkmn, string output) {
             var binary = new BinaryWriter(File.OpenWrite(output));
-            binary.Write((byte) (((Convert.ToInt32(setPkmnHeldItem) << 0x1) & 0x1) |
-                                 (Convert.ToInt32(setPkmnMoves) & 0x1)));
+            binary.Write((byte) ((Convert.ToByte(setPkmnHeldItem) << 0x1) | Convert.ToByte(setPkmnMoves)));
             binary.Write(trainerClass);
             binary.Write(battleType);
             binary.Write((byte) pkmn.Count);
-            foreach (var t in items) binary.Write(t);
+            foreach (var t in items) {
+                binary.Write(t);
+            }
             binary.Write(ai);
             if (pkmn.Count > 0) {
                 binary.Write(isHealer);
                 binary.Write(money);
                 binary.Write(prize);
             }
-
             binary.Close();
         }
     }
