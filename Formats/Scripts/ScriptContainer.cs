@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 
@@ -36,7 +37,12 @@ namespace BeaterLibrary.Formats.Scripts {
             while (_binary.ReadUInt16() != 0xFD13) {
                 _binary.BaseStream.Seek(-0x2, SeekOrigin.Current);
                 var address = _binary.ReadInt32() + (int) _binary.BaseStream.Position;
-                if (!addresses.Contains(address)) addresses.Add(address);
+                if (address >= _binary.BaseStream.Length) {
+                    break;
+                }
+                if (!addresses.Contains(address)) {
+                    addresses.Add(address);
+                }
             }
 
             return addresses;
@@ -60,6 +66,7 @@ namespace BeaterLibrary.Formats.Scripts {
             while (!isEnd) {
                 var c = tryReadCommand();
                 commands.Add(c);
+                Console.WriteLine(c.name);
                 switch (c.type) {
                     case CommandTypes.Call:
                     case CommandTypes.ConditionalJump:

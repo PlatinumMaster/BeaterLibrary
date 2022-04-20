@@ -21,6 +21,16 @@ namespace BeaterLibrary.Formats.Text {
         public bool isCompressed { get; private set; }
         public bool isEncrypted { get; private set; }
 
+        static Dictionary<int, string> specialCharacterMap = new() {
+            {0x2015, "―"},
+            {0x246D, "♂"},
+            {0x246E, "♀"},
+            {0x2486, "🇵🇰"},
+            {0x2487, "🇲🇳"},
+            {0xFFFE, "\\n"},
+            {0xFFFF, ""},
+        };
+
         public GFString(ushort step) {
             data = new StringBuilder();
             resetKey(step);
@@ -118,22 +128,22 @@ namespace BeaterLibrary.Formats.Text {
             characters = compBuff;
         }
         
-        private static string resolveCharacter(char character) {
-            Dictionary<int, string> specialCharacterMap = new Dictionary<int, string>() {
-                {0x2015, "―"},
-                {0x246D, "♂"},
-                {0x246E, "♀"},
-                {0x2486, "🇵🇰"},
-                {0x2487, "🇲🇳"},
-                {0xFFFE, "\\n"},
-                {0xFFFF, ""},
-            };
+        private static string charToUnicode(char character) {
             if (!specialCharacterMap.ContainsKey(character)) {
                 return $"\\x{(ushort)character:X4}";
             }
             return specialCharacterMap[character];
         }
         
+        // private static string unicodeToChar(char character) {
+        //     Dictionary<string, int> inv = specialCharacterMap.
+        //     if (!specialCharacterMap.ContainsKey(character)) {
+        //         return $"\\x{(ushort)character:X4}";
+        //     }
+        //     return specialCharacterMap[character];
+        // }
+
+
         // Utility
         private void resetKey(ushort step) => decKey = (ushort) (baseKey * step);
         public void keyStep() => decKey = (ushort) ((decKey << 0x3 | decKey >> 0xD) & 0xFFFF);
@@ -155,7 +165,7 @@ namespace BeaterLibrary.Formats.Text {
         
         public override string ToString() {
             foreach (char character in characters) {
-                data.Append(character > 0x14 && character < 0x100 ? character : resolveCharacter(character));
+                data.Append(character > 0x14 && character < 0x100 ? character : charToUnicode(character));
             }
             return data.ToString();
         }
