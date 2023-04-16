@@ -6,6 +6,7 @@ using BeaterLibrary.Formats.Scripts;
 
 namespace BeaterLibrary {
     public static class Util {
+        private static List<int> ParsedJumpOffsets = new List<int>();
         public static bool isNumericType(object parameter) {
             return parameter is sbyte || parameter is byte
                                       || parameter is short || parameter is ushort
@@ -15,10 +16,15 @@ namespace BeaterLibrary {
         public static string unpackScriptContainer(ScriptContainer sc) {
             var s = new StringBuilder();
             var jumpOffsets = sc.jumps.Select(x => x.startAddress).ToList();
-            foreach (var script in sc.scripts)
-                unpackMethod(script, $"Script_{sc.scripts.IndexOf(script) + 1}", s, jumpOffsets);
 
-            foreach (var function in sc.calls) unpackMethod(function.data, function.ToString(), s, jumpOffsets);
+            ParsedJumpOffsets = new List<int>();
+            foreach (var script in sc.scripts) {
+                unpackMethod(script, $"Script_{sc.scripts.IndexOf(script) + 1}", s, jumpOffsets);
+            }
+
+            foreach (var function in sc.calls) {
+                unpackMethod(function.data, function.ToString(), s, jumpOffsets);
+            }
 
             foreach (var actions in sc.actions) s.Append($"ActionSequence {actions.getDataToString()}\n");
 
@@ -26,17 +32,24 @@ namespace BeaterLibrary {
         }
 
         private static void unpackMethod(ScriptMethod script, string scriptName, StringBuilder s,
-            List<int> jumpOffsets) {
+            List<int> ScrJumpOffsets) {
             var baseAddress = script.address;
             s.Append($"{scriptName}:\n");
             foreach (var c in script.commands) {
-                if (jumpOffsets.Contains(baseAddress)) {
+                bool AlreadyParsed = ParsedJumpOffsets.Contains(baseAddress);
+                if (ScrJumpOffsets.Contains(baseAddress) && !AlreadyParsed) {
                     s.Append($"AnonymousScriptMethod_{baseAddress}:");
+                    ParsedJumpOffsets.Add(baseAddress);
                     s.AppendLine();
                 }
 
-                s.Append($"\t{c}\n");
                 baseAddress += c.size();
+                
+                if (ParsedJumpOffsets.Contains(baseAddress)) {
+                    continue;
+                }
+
+                s.Append($"\t{c}\n");
             }
 
             s.Append('\n');
