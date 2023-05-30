@@ -4,14 +4,14 @@ using System.Linq;
 namespace BeaterLibrary.Formats.Scripts {
     public class Actions {
         
-        public List<Action> commands { get; }
+        public List<Action> Commands { get; }
         public Actions(List<Action> commands) {
-            this.commands = commands;
+            this.Commands = commands;
         }
 
 
         public override string ToString() {
-            return commands.Aggregate("", (acc, e) => string.Join(' ', acc, $"\t{e}\n"));
+            return Commands.Aggregate("", (acc, e) => string.Join(' ', acc, $"\t{e}\n"));
         }
     }
 }

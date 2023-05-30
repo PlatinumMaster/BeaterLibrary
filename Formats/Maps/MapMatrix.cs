@@ -3,56 +3,94 @@ using System.IO;
 
 namespace BeaterLibrary.Formats.Maps {
     public class MapMatrix {
-        public bool includeMapHeaders { get; set; }
-        public List<MapMatrixRow> mapFilesMatrix { get; set; }
-        public List<MapMatrixRow> mapHeadersMatrix { get; set; }
+        public bool IncludeMapHeaders { get; set; }
+        public List<List<int>> MapFiles { get; set; }
+        public List<List<int>> ZoneHeaders { get; set; }
         
         public MapMatrix() {
-            mapFilesMatrix = new List<MapMatrixRow>();
-            mapHeadersMatrix = new List<MapMatrixRow>();
+            MapFiles = new List<List<int>>();
+            ZoneHeaders = new List<List<int>>();
         }
         
         public MapMatrix(byte[] data) {
-            BinaryReader binary = new BinaryReader(new MemoryStream(data));
-            mapFilesMatrix = new List<MapMatrixRow>();
-            mapHeadersMatrix = new List<MapMatrixRow>();
-            includeMapHeaders = binary.ReadInt32() is 1;
-            int width = binary.ReadUInt16(), height = binary.ReadUInt16();
-            for (int i = 0; i < height; ++i) {
-                MapMatrixRow entries = new MapMatrixRow();
-                for (int j = 0; j < width; ++j) {
-                    entries.Add(new MapMatrixCell(binary.ReadInt32()));
+            BinaryReader Binary = new BinaryReader(new MemoryStream(data));
+            MapFiles = new List<List<int>>();
+            ZoneHeaders = new List<List<int>>();
+            IncludeMapHeaders = Binary.ReadInt32() is 1;
+            
+            int Width = Binary.ReadUInt16(), Height = Binary.ReadUInt16();
+            
+            for (int i = 0; i < Height; ++i) {
+                List<int> Row = new List<int>();
+                for (int j = 0; j < Width; ++j) {
+                    Row.Add(Binary.ReadInt32());
                 }
-                mapFilesMatrix.Add(entries);
+                MapFiles.Add(Row);
             }
 
-            if (includeMapHeaders) {
-                for (int i = 0; i < height; ++i) {
-                    MapMatrixRow entries = new MapMatrixRow();
-                    for (int j = 0; j < width; ++j) {
-                        entries.Add(new MapMatrixCell(binary.ReadInt32()));
+            if (IncludeMapHeaders) {
+                for (int i = 0; i < Height; ++i) {
+                    List<int> Row = new List<int>();
+                    for (int j = 0; j < Width; ++j) {
+                        Row.Add(Binary.ReadInt32());
                     }
-                    mapHeadersMatrix.Add(entries);
+                    ZoneHeaders.Add(Row);
                 }
             }
         }
 
-        public void serialize(string path) {
-            BinaryWriter binary = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate));
-            binary.Write((uint)(includeMapHeaders ? 1 : 0));
-            if (mapFilesMatrix.Count > 0) {
-                binary.Write((ushort) mapFilesMatrix[0].Count);
+        public void Resize(int NewHeight, int NewWidth) {
+            if (NewWidth == 0 || NewHeight == 0) {
+                // Reset matrix.
+                Reset();
+                return;
             }
-            binary.Write((ushort)mapFilesMatrix.Count);
-            mapFilesMatrix.ForEach(x => {
-                x.ForEach(e => binary.Write(e.value));
-            });
-            if (includeMapHeaders) {
-                mapHeadersMatrix.ForEach(x => {
-                    x.ForEach(e => binary.Write(e.value));
-                });
+            
+            // Update height first.
+            if (NewHeight != MapFiles.Count) {
+                if (NewHeight > MapFiles.Count) {
+                    while (NewHeight > MapFiles.Count) {
+                        MapFiles.Add(new List<int>());
+                    }
+                    if (IncludeMapHeaders) {
+                        while (NewHeight > ZoneHeaders.Count) {
+                            ZoneHeaders.Add(new List<int>());
+                        }
+                    }
+                } else {
+                    while (NewHeight < MapFiles.Count) {
+                        MapFiles.RemoveAt(MapFiles.Count - 1);
+                    }
+                    if (IncludeMapHeaders) {
+                        while (NewHeight < ZoneHeaders.Count) {
+                            ZoneHeaders.RemoveAt(ZoneHeaders.Count - 1);
+                        }
+                    }
+                }
             }
-            binary.Close();
+            
+            // TODO: Update width.
+        }
+
+        public void Reset() {
+            this.MapFiles.Clear();
+            if (IncludeMapHeaders) {
+                this.ZoneHeaders.Clear();
+            }
+        }
+        
+        public void Serialize(string path) {
+            BinaryWriter Binary = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate));
+            Binary.Write((uint)(IncludeMapHeaders ? 1 : 0));
+            if (MapFiles.Count > 0) {
+                Binary.Write((ushort) MapFiles[0].Count);
+            }
+            Binary.Write((ushort)MapFiles.Count);
+            MapFiles.ForEach(x => x.ForEach(Binary.Write));
+            if (IncludeMapHeaders) {
+                ZoneHeaders.ForEach(x => x.ForEach(Binary.Write));
+            }
+            Binary.Close();
         }
     }
 }

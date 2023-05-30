@@ -6,7 +6,6 @@ using BeaterLibrary.Formats.Scripts;
 
 namespace BeaterLibrary {
     public static class Util {
-        private static List<int> ParsedJumpOffsets = new List<int>();
         public static bool isNumericType(object parameter) {
             return parameter is sbyte || parameter is byte
                                       || parameter is short || parameter is ushort
@@ -15,41 +14,29 @@ namespace BeaterLibrary {
 
         public static string unpackScriptContainer(ScriptContainer sc) {
             var s = new StringBuilder();
-            var jumpOffsets = sc.jumps.Select(x => x.startAddress).ToList();
+            var jumpOffsets = sc.Jumps.Select(x => x.StartAddress).ToList();
+            foreach (var script in sc.Scripts)
+                unpackMethod(script, $"Script_{sc.Scripts.IndexOf(script) + 1}", s, jumpOffsets);
 
-            ParsedJumpOffsets = new List<int>();
-            foreach (var script in sc.scripts) {
-                unpackMethod(script, $"Script_{sc.scripts.IndexOf(script) + 1}", s, jumpOffsets);
-            }
+            foreach (var function in sc.Calls) unpackMethod(function.Data, function.ToString(), s, jumpOffsets);
 
-            foreach (var function in sc.calls) {
-                unpackMethod(function.data, function.ToString(), s, jumpOffsets);
-            }
-
-            foreach (var actions in sc.actions) s.Append($"ActionSequence {actions.getDataToString()}\n");
+            foreach (var actions in sc.Actions) s.Append($"ActionSequence {actions.GetDataToString()}\n");
 
             return s.ToString();
         }
 
         private static void unpackMethod(ScriptMethod script, string scriptName, StringBuilder s,
-            List<int> ScrJumpOffsets) {
-            var baseAddress = script.address;
+            List<int> jumpOffsets) {
+            var baseAddress = script.Address;
             s.Append($"{scriptName}:\n");
-            foreach (var c in script.commands) {
-                bool AlreadyParsed = ParsedJumpOffsets.Contains(baseAddress);
-                if (ScrJumpOffsets.Contains(baseAddress) && !AlreadyParsed) {
+            foreach (var c in script.Commands) {
+                if (jumpOffsets.Contains(baseAddress)) {
                     s.Append($"AnonymousScriptMethod_{baseAddress}:");
-                    ParsedJumpOffsets.Add(baseAddress);
                     s.AppendLine();
                 }
 
-                baseAddress += c.size();
-                
-                if (ParsedJumpOffsets.Contains(baseAddress)) {
-                    continue;
-                }
-
                 s.Append($"\t{c}\n");
+                baseAddress += c.Size();
             }
 
             s.Append('\n');
@@ -108,20 +95,20 @@ namespace BeaterLibrary {
             // Write all of the commands from the YAML.
             o.WriteLine("@ -----------------");
             o.WriteLine("@ Script Commands");
-            foreach (var key in cmd.getCommands()) {
-                var c = cmd.getCommand(key);
-                o.Write($".macro {c.name} ");
-                for (var i = 0; i < c.types.Count; i++)
-                    o.Write($"p{i}{(i == c.types.Count - 1 ? "" : ",")} ");
+            foreach (var key in cmd.GetCommands()) {
+                var c = cmd.GetCommand(key);
+                o.Write($".macro {c.Name} ");
+                for (var i = 0; i < c.Types.Count; i++)
+                    o.Write($"p{i}{(i == c.Types.Count - 1 ? "" : ",")} ");
                 o.WriteLine();
-                o.WriteLine($".hword {c.id}");
+                o.WriteLine($".hword {c.ID}");
 
                 var j = 0;
-                foreach (var type in c.types)
+                foreach (var type in c.Types)
                     switch (type.Name) {
                         case "Int32":
-                            var isBranch = c.type is CommandTypes.Call || c.type is CommandTypes.ActionSequence ||
-                                           c.type is CommandTypes.ConditionalJump || c.type is CommandTypes.Jump;
+                            var isBranch = c.Type is CommandTypes.Call || c.Type is CommandTypes.ActionSequence ||
+                                           c.Type is CommandTypes.ConditionalJump || c.Type is CommandTypes.Jump;
                             o.WriteLine(isBranch ? $".word (\\p{j++} - .) - 4" : $".word \\p{j++}");
                             break;
                         case "UInt16":

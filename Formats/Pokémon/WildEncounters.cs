@@ -4,146 +4,146 @@ using System.IO;
 namespace BeaterLibrary.Formats.Pokémon {
     public class WildEncounters {
         public WildEncounters() {
-            grassEntries = new List<WildEncounterEntry>();
-            grassDoubleEntries = new List<WildEncounterEntry>();
-            grassSpecialEntries = new List<WildEncounterEntry>();
-            surfEntries = new List<WildEncounterEntry>();
-            surfSpecialEntries = new List<WildEncounterEntry>();
-            fishEntries = new List<WildEncounterEntry>();
-            fishSpecialEntries = new List<WildEncounterEntry>();
-            regular = 0;
-            doubleBattle = 0;
-            special = 0;
-            surf = 0;
-            surfSpecial = 0;
-            fish = 0;
-            fishSpecial = 0;
-            itemBattle = 0;
+            GrassEntries = new List<WildEncounterEntry>();
+            GrassDoubleEntries = new List<WildEncounterEntry>();
+            GrassSpecialEntries = new List<WildEncounterEntry>();
+            SurfEntries = new List<WildEncounterEntry>();
+            SurfSpecialEntries = new List<WildEncounterEntry>();
+            FishEntries = new List<WildEncounterEntry>();
+            FishSpecialEntries = new List<WildEncounterEntry>();
+            Regular = 0;
+            DoubleBattle = 0;
+            Special = 0;
+            Surf = 0;
+            SurfSpecial = 0;
+            Fish = 0;
+            FishSpecial = 0;
+            ItemBattle = 0;
         }
 
         public WildEncounters(byte[] data) : this() {
-            BinaryReader binary = new BinaryReader(new MemoryStream(data));
-            var entries = new List<WildEncounterEntry>();
-            regular = binary.ReadByte();
-            doubleBattle = binary.ReadByte();
-            special = binary.ReadByte();
-            surf = binary.ReadByte();
-            surfSpecial = binary.ReadByte();
-            fish = binary.ReadByte();
-            fishSpecial = binary.ReadByte();
-            itemBattle = binary.ReadByte();
+            BinaryReader Binary = new BinaryReader(new MemoryStream(data));
+            var Entries = new List<WildEncounterEntry>();
+            Regular = Binary.ReadByte();
+            DoubleBattle = Binary.ReadByte();
+            Special = Binary.ReadByte();
+            Surf = Binary.ReadByte();
+            SurfSpecial = Binary.ReadByte();
+            Fish = Binary.ReadByte();
+            FishSpecial = Binary.ReadByte();
+            ItemBattle = Binary.ReadByte();
 
-            while (binary.BaseStream.Position % 0xE8 != 0)
-                entries.Add(new WildEncounterEntry(binary));
+            while (Binary.BaseStream.Position % 0xE8 != 0)
+                Entries.Add(new WildEncounterEntry(Binary));
 
-            grassEntries = entries.GetRange(0x0, 0xC);
-            grassDoubleEntries = entries.GetRange(0xC, 0xC);
-            grassSpecialEntries = entries.GetRange(0x18, 0xC);
-            surfEntries = entries.GetRange(0x24, 0x5);
-            surfSpecialEntries = entries.GetRange(0x29, 0x5);
-            fishEntries = entries.GetRange(0x2E, 0x5);
-            fishSpecialEntries = entries.GetRange(0x33, 0x5);
+            GrassEntries = Entries.GetRange(0x0, 0xC);
+            GrassDoubleEntries = Entries.GetRange(0xC, 0xC);
+            GrassSpecialEntries = Entries.GetRange(0x18, 0xC);
+            SurfEntries = Entries.GetRange(0x24, 0x5);
+            SurfSpecialEntries = Entries.GetRange(0x29, 0x5);
+            FishEntries = Entries.GetRange(0x2E, 0x5);
+            FishSpecialEntries = Entries.GetRange(0x33, 0x5);
         }
 
-        public List<WildEncounterEntry> grassEntries { get; set; }
-        public List<WildEncounterEntry> grassDoubleEntries { get; set; }
-        public List<WildEncounterEntry> grassSpecialEntries { get; set; }
-        public List<WildEncounterEntry> surfEntries { get; set; }
-        public List<WildEncounterEntry> surfSpecialEntries { get; set; }
-        public List<WildEncounterEntry> fishEntries { get; set; }
-        public List<WildEncounterEntry> fishSpecialEntries { get; set; }
-        public byte regular { get; }
-        public byte doubleBattle { get; }
-        public byte special { get; }
-        public byte surf { get; }
-        public byte surfSpecial { get; }
-        public byte fish { get; }
-        public byte fishSpecial { get; }
-        public byte itemBattle { get; }
+        public List<WildEncounterEntry> GrassEntries { get; set; }
+        public List<WildEncounterEntry> GrassDoubleEntries { get; set; }
+        public List<WildEncounterEntry> GrassSpecialEntries { get; set; }
+        public List<WildEncounterEntry> SurfEntries { get; set; }
+        public List<WildEncounterEntry> SurfSpecialEntries { get; set; }
+        public List<WildEncounterEntry> FishEntries { get; set; }
+        public List<WildEncounterEntry> FishSpecialEntries { get; set; }
+        public byte Regular { get; }
+        public byte DoubleBattle { get; }
+        public byte Special { get; }
+        public byte Surf { get; }
+        public byte SurfSpecial { get; }
+        public byte Fish { get; }
+        public byte FishSpecial { get; }
+        public byte ItemBattle { get; }
 
-        public byte[] serialize() {
-            MemoryStream ms = new MemoryStream();
-            var binary = new BinaryWriter(ms);
-            binary.Write((byte) grassEntries.Count);
-            binary.Write((byte) grassDoubleEntries.Count);
-            binary.Write((byte) grassSpecialEntries.Count);
-            binary.Write((byte) surfEntries.Count);
-            binary.Write((byte) surfSpecialEntries.Count);
-            binary.Write((byte) fishEntries.Count);
-            binary.Write((byte) fishSpecialEntries.Count);
-            binary.Write(itemBattle);
+        public byte[] Serialize() {
+            MemoryStream Ms = new MemoryStream();
+            var Binary = new BinaryWriter(Ms);
+            Binary.Write((byte) GrassEntries.Count);
+            Binary.Write((byte) GrassDoubleEntries.Count);
+            Binary.Write((byte) GrassSpecialEntries.Count);
+            Binary.Write((byte) SurfEntries.Count);
+            Binary.Write((byte) SurfSpecialEntries.Count);
+            Binary.Write((byte) FishEntries.Count);
+            Binary.Write((byte) FishSpecialEntries.Count);
+            Binary.Write(ItemBattle);
 
             // Grass entries
-            foreach (var entry in grassEntries)
-                entry.serialize(binary);
-            for (var i = grassEntries.Count; i < 0xC; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in GrassEntries)
+                Entry.Serialize(Binary);
+            for (var I = GrassEntries.Count; I < 0xC; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
-            foreach (var entry in grassDoubleEntries)
-                entry.serialize(binary);
-            for (var i = grassDoubleEntries.Count; i < 0xC; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in GrassDoubleEntries)
+                Entry.Serialize(Binary);
+            for (var I = GrassDoubleEntries.Count; I < 0xC; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
-            foreach (var entry in grassSpecialEntries)
-                entry.serialize(binary);
-            for (var i = grassSpecialEntries.Count; i < 0xC; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in GrassSpecialEntries)
+                Entry.Serialize(Binary);
+            for (var I = GrassSpecialEntries.Count; I < 0xC; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
             // Surf Entries
-            foreach (var entry in surfEntries)
-                entry.serialize(binary);
-            for (var i = surfEntries.Count; i < 0x5; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in SurfEntries)
+                Entry.Serialize(Binary);
+            for (var I = SurfEntries.Count; I < 0x5; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
-            foreach (var entry in surfSpecialEntries)
-                entry.serialize(binary);
-            for (var i = surfSpecialEntries.Count; i < 0x5; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in SurfSpecialEntries)
+                Entry.Serialize(Binary);
+            for (var I = SurfSpecialEntries.Count; I < 0x5; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
             // Fishing Entries
-            foreach (var entry in fishEntries)
-                entry.serialize(binary);
-            for (var i = fishEntries.Count; i < 0x5; ++i)
-                new WildEncounterEntry().serialize(binary);
+            foreach (var Entry in FishEntries)
+                Entry.Serialize(Binary);
+            for (var I = FishEntries.Count; I < 0x5; ++I)
+                new WildEncounterEntry().Serialize(Binary);
 
-            foreach (var entry in fishSpecialEntries)
-                entry.serialize(binary);
-            for (var i = fishSpecialEntries.Count; i < 0x5; ++i)
-                new WildEncounterEntry().serialize(binary);
-            binary.Close();
-            return ms.ToArray();
+            foreach (var Entry in FishSpecialEntries)
+                Entry.Serialize(Binary);
+            for (var I = FishSpecialEntries.Count; I < 0x5; ++I)
+                new WildEncounterEntry().Serialize(Binary);
+            Binary.Close();
+            return Ms.ToArray();
         }
     }
 
     public class WildEncounterEntry {
         public WildEncounterEntry() {
-            nationalDexNumber = 0;
-            formNumber = 0;
-            minimumLevel = 0;
-            maximumLevel = 0;
+            NationalDexNumber = 0;
+            FormNumber = 0;
+            MinimumLevel = 0;
+            MaximumLevel = 0;
         }
 
         public WildEncounterEntry(BinaryReader binary) {
-            var dexAndForm = binary.ReadUInt16();
-            nationalDexNumber = (ushort) (dexAndForm & 0x7FF);
-            formNumber = (ushort) (dexAndForm >> 0xB);
-            minimumLevel = binary.ReadByte();
-            maximumLevel = binary.ReadByte();
+            var DexAndForm = binary.ReadUInt16();
+            NationalDexNumber = (ushort) (DexAndForm & 0x7FF);
+            FormNumber = (ushort) (DexAndForm >> 0xB);
+            MinimumLevel = binary.ReadByte();
+            MaximumLevel = binary.ReadByte();
         }
 
-        public ushort nationalDexNumber { get; set; }
-        public ushort formNumber { get; set; }
-        public byte minimumLevel { get; set; }
-        public byte maximumLevel { get; set; }
+        public ushort NationalDexNumber { get; set; }
+        public ushort FormNumber { get; set; }
+        public byte MinimumLevel { get; set; }
+        public byte MaximumLevel { get; set; }
 
-        public void serialize(BinaryWriter binary) {
-            binary.Write((ushort) ((ushort) (formNumber << 0xB) | nationalDexNumber));
-            binary.Write(minimumLevel);
-            binary.Write(maximumLevel);
+        public void Serialize(BinaryWriter binary) {
+            binary.Write((ushort) ((ushort) (FormNumber << 0xB) | NationalDexNumber));
+            binary.Write(MinimumLevel);
+            binary.Write(MaximumLevel);
         }
 
         public override string ToString() {
-            return $"Pokémon: {nationalDexNumber}\nForm: {formNumber}\nLevel Range: ({minimumLevel} - {maximumLevel})";
+            return $"Pokémon: {NationalDexNumber}\nForm: {FormNumber}\nLevel Range: ({MinimumLevel} - {MaximumLevel})";
         }
     }
 }

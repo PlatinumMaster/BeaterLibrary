@@ -11,61 +11,61 @@ namespace BeaterLibrary.Formats.Scripts {
         public CommandsListHandler(string game, string configurationPath) {
             _commands = new Dictionary<ushort, Command>();
             _commandMap = new Dictionary<string, ushort>();
-            addCommandsFromYaml(Path.Combine(configurationPath, game, "Base.yml"));
+            AddCommandsFromYaml(Path.Combine(configurationPath, game, "Base.yml"));
         }
         
         public CommandsListHandler(string game, string configurationPath, int plugins) : this(game, configurationPath) {
-            if (plugins != -1) addCommandsFromYaml(Path.Combine(configurationPath, game, $"Overlay {plugins}.yml"));
+            if (plugins != -1) AddCommandsFromYaml(Path.Combine(configurationPath, game, $"Overlay {plugins}.yml"));
         }
         
-        private void addCommandsFromYaml(string yamlPath) {
+        private void AddCommandsFromYaml(string yamlPath) {
             var s = File.OpenText(yamlPath);
-            var deserializer = new Deserializer();
-            var commandsYaml = deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
-            foreach (var keyValuePair in commandsYaml) {
-                int num;
-                YamlMappingNode yamlMappingNode;
-                keyValuePair.Deconstruct(out num, out yamlMappingNode);
-                var key = num;
-                var node = yamlMappingNode;
-                var cmd = readCommandDetail(node, key);
-                _commands.Add((ushort) key, cmd);
-                _commandMap.Add(cmd.name, (ushort) key);
+            var Deserializer = new Deserializer();
+            var CommandsYaml = Deserializer.Deserialize<Dictionary<int, YamlMappingNode>>(s);
+            foreach (var KeyValuePair in CommandsYaml) {
+                int Num;
+                YamlMappingNode YamlMappingNode;
+                KeyValuePair.Deconstruct(out Num, out YamlMappingNode);
+                var Key = Num;
+                var Node = YamlMappingNode;
+                var Cmd = ReadCommandDetail(Node, Key);
+                _commands.Add((ushort) Key, Cmd);
+                _commandMap.Add(Cmd.Name, (ushort) Key);
             }
         }
         
-        private static Command readCommandDetail(YamlMappingNode node, int key) {
-            List<Type> types;
-            CommandTypes cmdType;
-            List<string> parameterNames;
-            List<string> parameterDesc;
-            readCommandParameters(node, out types, out cmdType, out parameterNames, out parameterDesc);
-            return new Command(node["Name"].ToString(), (ushort) key, cmdType, types, parameterNames, parameterDesc);
+        private static Command ReadCommandDetail(YamlMappingNode node, int key) {
+            List<Type> Types;
+            CommandTypes CmdType;
+            List<string> ParameterNames;
+            List<string> ParameterDesc;
+            ReadCommandParameters(node, out Types, out CmdType, out ParameterNames, out ParameterDesc);
+            return new Command(node["Name"].ToString(), (ushort) key, CmdType, Types, ParameterNames, ParameterDesc);
         }
 
-        public Command getCommand(ushort id) {
+        public Command GetCommand(ushort id) {
             return _commands[id];
         }
 
-        public Dictionary<ushort, Command>.KeyCollection getCommands() {
+        public Dictionary<ushort, Command>.KeyCollection GetCommands() {
             return _commands.Keys;
         }
 
-        private static void readCommandParameters(YamlMappingNode node, out List<Type> types, out CommandTypes cmdType,
+        private static void ReadCommandParameters(YamlMappingNode node, out List<Type> types, out CommandTypes cmdType,
             out List<string> parameterNames, out List<string> parameterDesc) {
             types = new List<Type>();
             parameterNames = new List<string>();
             parameterDesc = new List<string>();
             cmdType = CommandTypes.Default;
-            var isExternCall = false;
-            if (node.Children.ContainsKey("ExternCall")) bool.TryParse(node["ExternCall"].ToString(), out isExternCall);
+            var IsExternCall = false;
+            if (node.Children.ContainsKey("ExternCall")) bool.TryParse(node["ExternCall"].ToString(), out IsExternCall);
             if (node.Children.ContainsKey("Parameters")) {
-                var parameterIndex = 0;
-                foreach (YamlMappingNode keyValuePair in (node["Parameters"] as YamlSequenceNode).Children) {
-                    parameterNames.Add(keyValuePair.Children.ContainsKey("Name")
-                        ? keyValuePair["Name"].ToString()
-                        : $"unk{parameterIndex}");
-                    switch (keyValuePair["Type"].ToString().ToLower()) {
+                var ParameterIndex = 0;
+                foreach (YamlMappingNode KeyValuePair in (node["Parameters"] as YamlSequenceNode).Children) {
+                    parameterNames.Add(KeyValuePair.Children.ContainsKey("Name")
+                        ? KeyValuePair["Name"].ToString()
+                        : $"unk{ParameterIndex}");
+                    switch (KeyValuePair["Type"].ToString().ToLower()) {
                         case "int":
                             types.Add(typeof(int));
                             break;
@@ -87,13 +87,13 @@ namespace BeaterLibrary.Formats.Scripts {
                             break;
                     }
 
-                    parameterIndex++;
+                    ParameterIndex++;
                 }
             }
 
             if (node.Children.ContainsKey("CommandType")) {
                 cmdType = CommandTypeLookup.SpecialCommandTypeLUT[((YamlScalarNode) node["CommandType"]).Value];
-                if (cmdType == CommandTypes.Call && isExternCall) cmdType = CommandTypes.Default;
+                if (cmdType == CommandTypes.Call && IsExternCall) cmdType = CommandTypes.Default;
             }
         }
     }

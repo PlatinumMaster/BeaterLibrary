@@ -8,29 +8,25 @@ namespace BeaterLibrary.Formats.Scripts {
     public class ScriptContainer {
         private readonly BinaryReader _binary;
         private readonly CommandsListHandler _handler;
-        public List<ScriptMethod> scripts { get; }
-        public List<Link<AnonymousScriptMethod>> calls { get; }
-        public List<Link<AnonymousScriptMethod>> jumps { get; }
-        public List<Link<Actions>> actions { get; }
+        public List<ScriptMethod> Scripts { get; }
+        public List<Link<AnonymousScriptMethod>> Calls { get; }
+        public List<Link<AnonymousScriptMethod>> Jumps { get; }
+        public List<Link<Actions>> Actions { get; }
         
         public ScriptContainer(byte[] data, string configurationPath, string game, int plugin) {
             // Initialize the script we will read from.
             _binary = new BinaryReader(new MemoryStream(data));
             _handler = new CommandsListHandler(game, configurationPath, plugin);
-            scripts = new List<ScriptMethod>();
-            calls = new List<Link<AnonymousScriptMethod>>();
-            jumps = new List<Link<AnonymousScriptMethod>>();
-            actions = new List<Link<Actions>>();
-            getScriptAddresses().ForEach(x => scripts.Add(new ScriptMethod(readCommands(x), x)));
+            Scripts = new List<ScriptMethod>();
+            Calls = new List<Link<AnonymousScriptMethod>>();
+            Jumps = new List<Link<AnonymousScriptMethod>>();
+            Actions = new List<Link<Actions>>();
+            GetScriptAddresses().ForEach(x => Scripts.Add(new ScriptMethod(ReadCommands(x), x)));
             // We are done reading from it.
             _binary.Close();
         }
-        
-        public ScriptContainer(string path, string configurationPath, string game, int plugin) : this(
-            File.ReadAllBytes(path), configurationPath, game, plugin) {
-        }
 
-        public List<int> getScriptAddresses() {
+        public List<int> GetScriptAddresses() {
             var addresses = new List<int>();
             _binary.BaseStream.Position = 0;
 
@@ -48,102 +44,103 @@ namespace BeaterLibrary.Formats.Scripts {
             return addresses;
         }
 
-        public List<Action> readActions(int address) {
-            var actionCmds = new List<Action>();
-            _binary.BaseStream.Position = address;
-            actionCmds.Add(new Action(_binary));
-            while (actionCmds.Last().id != 0xFE) actionCmds.Add(new Action(_binary));
-            actionCmds.Last().name = "TerminateActionSequence";
-            return actionCmds;
+        public List<Action> ReadActions(int Address) {
+            List<Action> ActionCmds = new List<Action>();
+            _binary.BaseStream.Position = Address;
+            ActionCmds.Add(new Action(_binary));
+            while (ActionCmds.Last().Id != 0xFE) ActionCmds.Add(new Action(_binary));
+            ActionCmds.Last().Name = "TerminateActionSequence";
+            return ActionCmds;
         }
 
-        public List<Command> readCommands(int address) {
-            List<Command> commands = new();
-            List<Link<AnonymousScriptMethod>> localCalls = new(), localJumps = new();
-            List<Link<Actions>> localActions = new();
-            _binary.BaseStream.Position = address;
-            var isEnd = false;
-            while (!isEnd) {
-                var c = tryReadCommand();
-                commands.Add(c);
-                Console.WriteLine(c.name);
-                switch (c.type) {
+        public List<Command> ReadCommands(int Address) {
+            List<Command> Commands = new List<Command>();
+            List<Link<AnonymousScriptMethod>> LocalCalls = new List<Link<AnonymousScriptMethod>>(), LocalJumps = new List<Link<AnonymousScriptMethod>>();
+            List<Link<Actions>> LocalActions = new List<Link<Actions>>();
+            _binary.BaseStream.Seek(Address, SeekOrigin.Begin);
+            
+            bool End = false;
+            while (!End) {
+                Command c = TryReadCommand();
+                Commands.Add(c);
+                switch (c.Type) {
                     case CommandTypes.Call:
                     case CommandTypes.ConditionalJump:
                     case CommandTypes.Jump:
-                        bindLinkToCommand(c.type is CommandTypes.Call ? localCalls : localJumps,
-                            (int) c.parameters.Last(), c);
+                        BindLinkToCommand(c.Type is CommandTypes.Call ? LocalCalls : LocalJumps, (int) c.Parameters.Last(), c);
                         break;
                     case CommandTypes.ActionSequence:
-                        bindLinkToCommand(localActions, (int) c.parameters.Last(), c);
+                        BindLinkToCommand(LocalActions, (int) c.Parameters.Last(), c);
                         break;
                     case CommandTypes.End:
                     case CommandTypes.Return:
-                        isEnd = jumps.All(x => x.startAddress != _binary.BaseStream.Position);
+                        End = Jumps.All(x => x.StartAddress != _binary.BaseStream.Position);
                         break;
                 }
             }
 
-            localActions.ForEach(x => {
-                x.data = new Actions(readActions(x.startAddress));
-                tryAddLink(actions, x);
+            LocalActions.ForEach(x => {
+                x.Data = new Actions(ReadActions(x.StartAddress));
+                TryAddLink(Actions, x);
             });
-            localCalls.ForEach(x => {
-                x.data = new AnonymousScriptMethod(readCommands(x.startAddress), x.startAddress);
-                tryAddLink(calls, x);
+            
+            LocalCalls.ForEach(x => {
+                x.Data = new AnonymousScriptMethod(ReadCommands(x.StartAddress), x.StartAddress);
+                TryAddLink(Calls, x);
             });
-            localJumps.ForEach(x => tryAddLink(jumps, x));
-            return commands;
+            
+            LocalJumps.ForEach(x => TryAddLink(Jumps, x));
+            return Commands;
         }
 
-        public Command tryReadCommand() {
-            var cmd = tryGetCommandTemplate(_binary.ReadUInt16());
-            foreach (var T in cmd.types)
+        public Command TryReadCommand() {
+            Command Cmd = TryGetCommandTemplate(_binary.ReadUInt16());
+            foreach (Type T in Cmd.Types) {
                 switch (T.Name) {
                     case "Int32":
-                        cmd.parameters.Add(_binary.ReadInt32());
-                        if (Command.functionTypes.Contains(cmd.type)) {
-                            cmd.parameters[^1] = Convert.ToInt32(_binary.BaseStream.Position + (int) cmd.parameters[^1]);
+                        Cmd.Parameters.Add(_binary.ReadInt32());
+                        if (Command.FunctionTypes.Contains(Cmd.Type)) {
+                            Cmd.Parameters[^1] = Convert.ToInt32(_binary.BaseStream.Position + (int) Cmd.Parameters[^1]);
                         }
-
                         break;
                     case "UInt16":
-                        cmd.parameters.Add(_binary.ReadUInt16());
+                        Cmd.Parameters.Add(_binary.ReadUInt16());
                         break;
                     case "Byte":
-                        cmd.parameters.Add(_binary.ReadByte());
+                        Cmd.Parameters.Add(_binary.ReadByte());
                         break;
                     case "FX32":
-                        cmd.parameters.Add(_binary.ReadUInt32() / 0x1000);
+                        Cmd.Parameters.Add(_binary.ReadUInt32() / 0x1000);
                         break;
                     case "FX16":
-                        cmd.parameters.Add(_binary.ReadUInt16() / 0x1000);
+                        Cmd.Parameters.Add(_binary.ReadUInt16() / 0x1000);
                         break;
                     default:
                         throw new Exception($"Invalid type \"{T.Name}\".");
                 }
-
-            return cmd;
+            }
+            return Cmd;
         }
 
-        private void bindLinkToCommand<T>(List<Link<T>> target, int address, Command c) {
-            tryAddLink(target, new Link<T> {
-                startAddress = address
+        private void BindLinkToCommand<T>(List<Link<T>> Target, int Address, Command C) {
+            TryAddLink(Target, new Link<T> {
+                StartAddress = Address
             });
-            c.parameters[^1] = target.Find(x => x.startAddress == address);
+            C.Parameters[^1] = Target.Find(x => x.StartAddress == Address);
         }
 
-        private void tryAddLink<T>(List<Link<T>> target, Link<T> link) {
-            if (target.All(x => x.startAddress != link.startAddress)) {
-                target.Add(link);
+        private void TryAddLink<T>(List<Link<T>> Target, Link<T> Link) {
+            if (Target.All(x => x.StartAddress != Link.StartAddress)) {
+                Target.Add(Link);
             }
         }
 
-        private Command tryGetCommandTemplate(ushort id) {
-            if (!_handler.getCommands().Contains(id))
-                throw new Exception($"Unrecognized command ID: {id} @ position {_binary.BaseStream.Position - 0x2}.");
-            var def = _handler.getCommand(id);
-            return new Command(def.name, def.id, def.type, def.types, def.parameterNames, def.parameterDesc);
+        private Command TryGetCommandTemplate(ushort ID) {
+            if (!_handler.GetCommands().Contains(ID)) {
+                throw new Exception($"Unrecognized command ID: {ID} @ position {_binary.BaseStream.Position - 0x2}.");
+            }
+            Command def = _handler.GetCommand(ID);
+            return new Command(def.Name, def.ID, def.Type, def.Types, def.ParameterNames, def.ParameterDesc);
         }
     }
 }

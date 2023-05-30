@@ -4,15 +4,15 @@ using System.Linq;
 namespace BeaterLibrary.Formats.Scripts {
     public class ScriptMethod {
         public ScriptMethod(List<Command> commands, int address) {
-            this.commands = commands;
-            this.address = address;
+            this.Commands = commands;
+            this.Address = address;
         }
 
-        public List<Command> commands { get; set; }
+        public List<Command> Commands { get; set; }
 
-        public int address { get; set; }
+        public int Address { get; set; }
 
-        public override string ToString() => commands.Aggregate("", (x, y) => string.Join(' ', x, $"\t{y}\n"));
+        public override string ToString() => Commands.Aggregate("", (x, y) => string.Join(' ', x, $"\t{y}\n"));
     }
 
     public class AnonymousScriptMethod : ScriptMethod {
