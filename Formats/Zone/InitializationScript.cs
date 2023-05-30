@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace BeaterLibrary.Formats.Zone_Entities {
+namespace BeaterLibrary.Formats.Zone {
     public class InitializationScript {
         public InitializationScript() {
             Type = 0;

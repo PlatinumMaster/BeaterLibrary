@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BeaterLibrary.Formats.Zone_Entities {
+namespace BeaterLibrary.Formats.Zone {
     public class ZoneEntities : FieldObject {
         public ZoneEntities() {
             npcs = new List<NPC>();

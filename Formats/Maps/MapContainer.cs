@@ -26,7 +26,7 @@ namespace BeaterLibrary.Formats.Maps {
         private ushort _nSections;
 
         public MapContainer(ushort magic) {
-            this.Magic = magic;
+            Magic = magic;
             Model = new NitroSystemBinaryModel();
             Permissions = new byte[] { };
             Permissions2 = new byte[] { };

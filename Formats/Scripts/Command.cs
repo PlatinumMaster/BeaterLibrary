@@ -12,12 +12,12 @@ namespace BeaterLibrary.Formats.Scripts {
         
         public Command(string name, ushort id, CommandTypes type, IReadOnlyList<Type> types,
             List<string> parameterNames, List<string> parameterDesc) {
-            this.Name = name;
-            this.Types = types;
-            this.ParameterNames = parameterNames;
-            this.ParameterDesc = parameterDesc;
-            this.ID = id;
-            this.Type = type;
+            Name = name;
+            Types = types;
+            ParameterNames = parameterNames;
+            ParameterDesc = parameterDesc;
+            ID = id;
+            Type = type;
             Parameters = new List<object>();
         }
 

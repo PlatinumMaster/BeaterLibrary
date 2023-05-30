@@ -4,8 +4,8 @@ using System.Linq;
 namespace BeaterLibrary.Formats.Scripts {
     public class ScriptMethod {
         public ScriptMethod(List<Command> commands, int address) {
-            this.Commands = commands;
-            this.Address = address;
+            Commands = commands;
+            Address = address;
         }
 
         public List<Command> Commands { get; set; }

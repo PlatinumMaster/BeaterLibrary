@@ -1,4 +1,4 @@
-﻿namespace BeaterLibrary.Formats.Zone_Entities {
+﻿namespace BeaterLibrary.Formats.Zone {
     public class FieldObject {
         
     }

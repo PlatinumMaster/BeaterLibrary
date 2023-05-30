@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace BeaterLibrary.Formats.Zone_Entities {
+namespace BeaterLibrary.Formats.Zone {
     public class TriggerRelated : FieldObject {
         public TriggerRelated() {
             variable = 0;

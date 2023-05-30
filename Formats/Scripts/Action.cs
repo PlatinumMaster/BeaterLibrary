@@ -9,9 +9,9 @@ namespace BeaterLibrary.Formats.Scripts {
         }
 
         public Action(string name, ushort id, ushort duration) {
-            this.Name = name;
-            this.Id = id;
-            this.Duration = duration;
+            Name = name;
+            Id = id;
+            Duration = duration;
         }
 
         public string Name { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace BeaterLibrary.Formats.Zone_Entities {
+namespace BeaterLibrary.Formats.Zone {
     [Serializable]
     public class Warp : FieldObject {
         public Warp() {

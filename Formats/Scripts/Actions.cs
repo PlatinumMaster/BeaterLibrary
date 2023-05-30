@@ -6,7 +6,7 @@ namespace BeaterLibrary.Formats.Scripts {
         
         public List<Action> Commands { get; }
         public Actions(List<Action> commands) {
-            this.Commands = commands;
+            Commands = commands;
         }
 
 

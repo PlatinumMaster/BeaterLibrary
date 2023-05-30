@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BeaterLibrary.Formats.Maps {
+namespace BeaterLibrary.Formats.Zone {
     public class ZoneHeaders {
         public ZoneHeaders() {
             headers = new List<ZoneHeader>();

@@ -73,9 +73,9 @@ namespace BeaterLibrary.Formats.Maps {
         }
 
         public void Reset() {
-            this.MapFiles.Clear();
+            MapFiles.Clear();
             if (IncludeMapHeaders) {
-                this.ZoneHeaders.Clear();
+                ZoneHeaders.Clear();
             }
         }
         
