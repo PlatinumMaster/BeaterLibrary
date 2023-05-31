@@ -47,7 +47,7 @@ namespace BeaterLibrary.Formats.Scripts {
         public override string ToString() {
             var FormattedParams = new string[Parameters.Count];
             for (var i = 0; i < Parameters.Count; i++)
-                FormattedParams[i] = Util.isNumericType(Parameters[i])
+                FormattedParams[i] = Util.IsNumericType(Parameters[i])
                     ? string.Format("0x{0:X}", Parameters[i])
                     : Parameters[i].ToString();
             return string.Join(' ', Name, string.Join(", ", FormattedParams));

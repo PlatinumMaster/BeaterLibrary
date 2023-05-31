@@ -6,43 +6,13 @@ using BeaterLibrary.Formats.Scripts;
 
 namespace BeaterLibrary {
     public static class Util {
-        public static bool isNumericType(object parameter) {
+        public static bool IsNumericType(object parameter) {
             return parameter is sbyte || parameter is byte
                                       || parameter is short || parameter is ushort
                                       || parameter is int || parameter is uint;
         }
 
-        public static string unpackScriptContainer(ScriptContainer sc) {
-            var s = new StringBuilder();
-            var jumpOffsets = sc.Jumps.Select(x => x.StartAddress).ToList();
-            foreach (var script in sc.Scripts)
-                unpackMethod(script, $"Script_{sc.Scripts.IndexOf(script) + 1}", s, jumpOffsets);
-
-            foreach (var function in sc.Calls) unpackMethod(function.Data, function.ToString(), s, jumpOffsets);
-
-            foreach (var actions in sc.Actions) s.Append($"ActionSequence {actions.GetDataToString()}\n");
-
-            return s.ToString();
-        }
-
-        private static void unpackMethod(ScriptMethod script, string scriptName, StringBuilder s,
-            List<int> jumpOffsets) {
-            var baseAddress = script.Address;
-            s.Append($"{scriptName}:\n");
-            foreach (var c in script.Commands) {
-                if (jumpOffsets.Contains(baseAddress)) {
-                    s.Append($"AnonymousScriptMethod_{baseAddress}:");
-                    s.AppendLine();
-                }
-
-                s.Append($"\t{c}\n");
-                baseAddress += c.Size();
-            }
-
-            s.Append('\n');
-        }
-
-        public static void generateCommandAsm(string game, string configurationPath, int scriptPlugins) {
+        public static void GenerateIncludes(string game, string configurationPath, int scriptPlugins) {
             var cmd = new CommandsListHandler(game, configurationPath, scriptPlugins);
             using var o = new StreamWriter($"{game}.s");
             // Helper Macros
