@@ -12,22 +12,22 @@ namespace BeaterLibrary.Formats.Maps {
             set;
         }
 
-        public NitroSystemBinaryModel Model { get; set; }
+        public NSBMD Model { get; set; }
         public byte[] Permissions { get; set; }
         public byte[] Permissions2 { get; set; }
         public byte[] BuildingPositions { get; set; }
         public enum MagicLabels {
-            Wb = 0x4257,
-            Gc = 0x4347,
-            Ng = 0x474E,
-            Rd = 0x4452
+            WB = 0x4257,
+            GC = 0x4347,
+            NG = 0x474E,
+            RD = 0x4452
         }
 
         private ushort _nSections;
 
         public MapContainer(ushort magic) {
             Magic = magic;
-            Model = new NitroSystemBinaryModel();
+            Model = new NSBMD();
             Permissions = new byte[] { };
             Permissions2 = new byte[] { };
             BuildingPositions = new byte[] { };
@@ -35,7 +35,7 @@ namespace BeaterLibrary.Formats.Maps {
 
         public MapContainer(byte[] data) {
             BinaryReader Binary = new BinaryReader(new MemoryStream(data));
-            Model = new NitroSystemBinaryModel();
+            Model = new NSBMD();
             Permissions = new byte[] { };
             Permissions2 = new byte[] { };
             BuildingPositions = new byte[] { };
@@ -46,15 +46,15 @@ namespace BeaterLibrary.Formats.Maps {
             uint PermissionTableOffset = 0, PermissionTable2Offset = 0, BuildingPosOffset = 0, FileSize = 0;
 
             switch (ContainerType) {
-                case MagicLabels.Ng:
+                case MagicLabels.NG:
                     // Model and Building Positions
                     break;
-                case MagicLabels.Rd:
-                case MagicLabels.Wb:
+                case MagicLabels.RD:
+                case MagicLabels.WB:
                     // Model, Permission Table 1, and Building Positions
                     PermissionTableOffset = Binary.ReadUInt32();
                     break;
-                case MagicLabels.Gc:
+                case MagicLabels.GC:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
                     PermissionTableOffset = Binary.ReadUInt32();
                     PermissionTable2Offset = Binary.ReadUInt32();
@@ -66,21 +66,21 @@ namespace BeaterLibrary.Formats.Maps {
             BuildingPosOffset = Binary.ReadUInt32();
             FileSize = Binary.ReadUInt32();
             switch (ContainerType) {
-                case MagicLabels.Ng:
+                case MagicLabels.NG:
                     // Model and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (BuildingPosOffset - ModelOffset)));
+                    Model = new NSBMD(Binary.ReadBytes((int) (BuildingPosOffset - ModelOffset)));
                     BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset));
                     break;
-                case MagicLabels.Rd:
-                case MagicLabels.Wb:
+                case MagicLabels.RD:
+                case MagicLabels.WB:
                     // Model, Permission Table 1, and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
+                    Model = new NSBMD(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
                     Permissions = Binary.ReadBytes((int) (BuildingPosOffset - PermissionTableOffset));
                     BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset));
                     break;
-                case MagicLabels.Gc:
+                case MagicLabels.GC:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
-                    Model = new NitroSystemBinaryModel(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
+                    Model = new NSBMD(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
                     Permissions = Binary.ReadBytes((int) (PermissionTable2Offset - PermissionTableOffset));
                     Permissions2 = Binary.ReadBytes((int) (BuildingPosOffset - PermissionTable2Offset));
                     BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset));
@@ -92,11 +92,11 @@ namespace BeaterLibrary.Formats.Maps {
 
         public void UpdateContainerType() {
             if (Permissions.Length == 0 && Permissions2.Length == 0) {
-                ContainerType = MagicLabels.Ng;
+                ContainerType = MagicLabels.NG;
             } else if (Permissions.Length != 0 || Permissions2.Length != 0) {
-                ContainerType = Permissions.Length == 0x6004 ? MagicLabels.Rd : MagicLabels.Wb;
+                ContainerType = Permissions.Length == 0x6004 ? MagicLabels.RD : MagicLabels.WB;
             } else {
-                ContainerType = MagicLabels.Gc;
+                ContainerType = MagicLabels.GC;
             }
         }
 
@@ -107,13 +107,13 @@ namespace BeaterLibrary.Formats.Maps {
 
             switch (_nSections) {
                 case 2:
-                    Magic = (ushort) MagicLabels.Ng;
+                    Magic = (ushort) MagicLabels.NG;
                     break;
                 case 3:
-                    Magic = Permissions.Length == 0x6004 ? (ushort) MagicLabels.Rd : (ushort) MagicLabels.Wb;
+                    Magic = Permissions.Length == 0x6004 ? (ushort) MagicLabels.RD : (ushort) MagicLabels.WB;
                     break;
                 case 4:
-                    Magic = (ushort) MagicLabels.Gc;
+                    Magic = (ushort) MagicLabels.GC;
                     break;
             }
 
