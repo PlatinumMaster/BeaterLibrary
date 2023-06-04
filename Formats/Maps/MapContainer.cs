@@ -7,7 +7,7 @@ using BeaterLibrary.Formats.Nitro;
 namespace BeaterLibrary.Formats.Maps {
     public class MapContainer {
         public ushort Magic { get; set; }
-        public MagicLabels ContainerType {
+        public MapContainerType ContainerType {
             get;
             set;
         }
@@ -16,7 +16,7 @@ namespace BeaterLibrary.Formats.Maps {
         public byte[] Permissions { get; set; }
         public byte[] Permissions2 { get; set; }
         public byte[] BuildingPositions { get; set; }
-        public enum MagicLabels {
+        public enum MapContainerType {
             WB = 0x4257,
             GC = 0x4347,
             NG = 0x474E,
@@ -25,8 +25,8 @@ namespace BeaterLibrary.Formats.Maps {
 
         private ushort _nSections;
 
-        public MapContainer(ushort magic) {
-            Magic = magic;
+        public MapContainer(MapContainerType magic) {
+            ContainerType = magic;
             Model = new NSBMD();
             Permissions = new byte[] { };
             Permissions2 = new byte[] { };
@@ -42,19 +42,19 @@ namespace BeaterLibrary.Formats.Maps {
             Magic = Binary.ReadUInt16();
             _nSections = Binary.ReadUInt16();
             var ModelOffset = Binary.ReadUInt32();
-            ContainerType = (MagicLabels) Magic;
+            ContainerType = (MapContainerType) Magic;
             uint PermissionTableOffset = 0, PermissionTable2Offset = 0, BuildingPosOffset = 0, FileSize = 0;
 
             switch (ContainerType) {
-                case MagicLabels.NG:
+                case MapContainerType.NG:
                     // Model and Building Positions
                     break;
-                case MagicLabels.RD:
-                case MagicLabels.WB:
+                case MapContainerType.RD:
+                case MapContainerType.WB:
                     // Model, Permission Table 1, and Building Positions
                     PermissionTableOffset = Binary.ReadUInt32();
                     break;
-                case MagicLabels.GC:
+                case MapContainerType.GC:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
                     PermissionTableOffset = Binary.ReadUInt32();
                     PermissionTable2Offset = Binary.ReadUInt32();
@@ -66,19 +66,19 @@ namespace BeaterLibrary.Formats.Maps {
             BuildingPosOffset = Binary.ReadUInt32();
             FileSize = Binary.ReadUInt32();
             switch (ContainerType) {
-                case MagicLabels.NG:
+                case MapContainerType.NG:
                     // Model and Building Positions
                     Model = new NSBMD(Binary.ReadBytes((int) (BuildingPosOffset - ModelOffset)));
                     BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset));
                     break;
-                case MagicLabels.RD:
-                case MagicLabels.WB:
+                case MapContainerType.RD:
+                case MapContainerType.WB:
                     // Model, Permission Table 1, and Building Positions
                     Model = new NSBMD(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
                     Permissions = Binary.ReadBytes((int) (BuildingPosOffset - PermissionTableOffset));
                     BuildingPositions = Binary.ReadBytes((int) (FileSize - BuildingPosOffset));
                     break;
-                case MagicLabels.GC:
+                case MapContainerType.GC:
                     // Model, Permission Table 1, Permission Table 2, and Building Positions
                     Model = new NSBMD(Binary.ReadBytes((int) (PermissionTableOffset - ModelOffset)));
                     Permissions = Binary.ReadBytes((int) (PermissionTable2Offset - PermissionTableOffset));
@@ -92,11 +92,11 @@ namespace BeaterLibrary.Formats.Maps {
 
         public void UpdateContainerType() {
             if (Permissions.Length == 0 && Permissions2.Length == 0) {
-                ContainerType = MagicLabels.NG;
+                ContainerType = MapContainerType.NG;
             } else if (Permissions.Length != 0 || Permissions2.Length != 0) {
-                ContainerType = Permissions.Length == 0x6004 ? MagicLabels.RD : MagicLabels.WB;
+                ContainerType = Permissions.Length == 0x6004 ? MapContainerType.RD : MapContainerType.WB;
             } else {
-                ContainerType = MagicLabels.GC;
+                ContainerType = MapContainerType.GC;
             }
         }
 
@@ -107,13 +107,13 @@ namespace BeaterLibrary.Formats.Maps {
 
             switch (_nSections) {
                 case 2:
-                    Magic = (ushort) MagicLabels.NG;
+                    Magic = (ushort) MapContainerType.NG;
                     break;
                 case 3:
-                    Magic = Permissions.Length == 0x6004 ? (ushort) MagicLabels.RD : (ushort) MagicLabels.WB;
+                    Magic = Permissions.Length == 0x6004 ? (ushort) MapContainerType.RD : (ushort) MapContainerType.WB;
                     break;
                 case 4:
-                    Magic = (ushort) MagicLabels.GC;
+                    Magic = (ushort) MapContainerType.GC;
                     break;
             }
 
@@ -122,15 +122,15 @@ namespace BeaterLibrary.Formats.Maps {
                 b.Write(_nSections);
                 b.Write(0x4 * _nSections + 0x8); // Location of model
                 if (Permissions.Length > 0)
-                    b.Write(0x4 * _nSections + 0x8 + Model.data.Length); // Location of Permissions table 1
+                    b.Write(0x4 * _nSections + 0x8 + Model.Data.Length); // Location of Permissions table 1
                 if (Permissions2.Length > 0)
-                    b.Write(0x4 * _nSections + 0x8 + Model.data.Length +
+                    b.Write(0x4 * _nSections + 0x8 + Model.Data.Length +
                             Permissions.Length); // Location of Permissions table 2
-                b.Write(0x4 * _nSections + 0x8 + Model.data.Length + Permissions.Length +
+                b.Write(0x4 * _nSections + 0x8 + Model.Data.Length + Permissions.Length +
                         Permissions2.Length); // Location of building positions
-                b.Write(0x4 * _nSections + 0x8 + Model.data.Length + Permissions.Length + Permissions2.Length +
+                b.Write(0x4 * _nSections + 0x8 + Model.Data.Length + Permissions.Length + Permissions2.Length +
                         BuildingPositions.Length); // file size
-                b.Write(Model.data);
+                b.Write(Model.Data);
                 b.Write(Permissions.ToArray());
                 b.Write(Permissions2.ToArray());
                 b.Write(BuildingPositions.ToArray());
